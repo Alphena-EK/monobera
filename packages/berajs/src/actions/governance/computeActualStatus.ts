@@ -29,7 +29,6 @@ export function computeActualStatus(
     if (proposal.status === ProposalStatus.CanceledByGuardian) {
       return ProposalStatus.CanceledByGuardian;
     }
-
     if (proposalOnChainState === ProposalState.Canceled) {
       if (proposal.voteStartBlock < currentBlock)
         return ProposalStatus.CanceledByUser;
