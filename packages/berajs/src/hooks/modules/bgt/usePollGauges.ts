@@ -1,30 +1,21 @@
 import useSWR from "swr";
 
-import { GaugeFilter, GetGaugeData, getGauges } from "~/actions/bgt/getGauges";
-import {
-  DefaultHookOptions,
-  DefaultHookReturnType,
-  Gauge,
-  useBeraJs,
-} from "../../..";
-
-export interface IUseGaugessResponse
-  extends DefaultHookReturnType<GetGaugeData> {
-  gaugeCounts: number;
-  gaugeList: Gauge[];
-  gaugeDictionary: { [key: string]: Gauge };
-}
+import { getGauges } from "~/actions/bgt/getGauges";
+import { DefaultHookOptions, useBeraJs } from "../../..";
+import { GetVaultsQueryVariables } from "@bera/graphql/pol/api";
 
 export const usePollGauges = (
-  filter?: GaugeFilter,
+  filter?: GetVaultsQueryVariables,
   options?: DefaultHookOptions,
-): IUseGaugessResponse => {
+) => {
   const { config: beraConfig, account } = useBeraJs();
   const config = options?.beraConfigOverride ?? beraConfig;
   const QUERY_KEY = ["defaultGaugeList", config, account, filter];
-  const swrResponse = useSWR<GetGaugeData, any, typeof QUERY_KEY>(
+  const swrResponse = useSWR(
     QUERY_KEY,
-    async () => await getGauges(config, filter),
+    async () => {
+      return await getGauges(config, filter);
+    },
     {
       ...options?.opts,
     },
@@ -32,9 +23,6 @@ export const usePollGauges = (
 
   return {
     ...swrResponse,
-    gaugeCounts: swrResponse.data?.gaugeCounts ?? 0,
-    gaugeList: swrResponse.data?.gaugeList ?? [],
-    gaugeDictionary: swrResponse.data?.gaugeDictionary ?? {},
     refresh: swrResponse.mutate,
   };
 };

@@ -3,7 +3,7 @@ import {
   ValidatorStakedBgtsFragment,
   type BlockRewardStatsByValidatorFragment,
   type GetValidatorIncentivesReceivedsQuery,
-} from "@bera/graphql/pol";
+} from "@bera/graphql/pol/subgraph";
 import { addDays } from "date-fns";
 
 type GroupedValidatorRewardsData = {

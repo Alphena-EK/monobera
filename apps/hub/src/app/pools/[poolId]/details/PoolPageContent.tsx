@@ -9,7 +9,7 @@ import {
   usePollBalance,
   ADDRESS_ZERO,
   useRewardVaultBalanceFromStakingToken,
-  useSelectedGauge,
+  useRewardVault,
 } from "@bera/berajs";
 import { beraTokenAddress, blockExplorerUrl } from "@bera/config";
 import {
@@ -177,7 +177,7 @@ export default function PoolPageContent({
       stakingToken: pool?.address as Address,
     });
 
-  const { data: gauge } = useSelectedGauge(rewardVault?.address as Address);
+  const { data: gauge } = useRewardVault(rewardVault?.address as Address);
   const userSharePercentage = userPositionBreakdown?.userSharePercentage ?? 0;
 
   const didUserDeposit =

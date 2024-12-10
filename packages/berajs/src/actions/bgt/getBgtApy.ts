@@ -6,7 +6,7 @@ import {
   GetGlobalCuttingBoardQueryResult,
   GetGlobalCuttingBoardQueryVariables,
   type GetGlobalCuttingBoardQuery,
-} from "@bera/graphql/pol";
+} from "@bera/graphql/pol/subgraph";
 import { Address } from "viem";
 
 import { BeraConfig } from "~/types/global";

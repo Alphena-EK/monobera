@@ -4,7 +4,7 @@ import { notFound, useRouter } from "next/navigation";
 import {
   truncateHash,
   useVaultAddress,
-  useSelectedGauge,
+  useRewardVault,
   useSelectedGaugeValidators,
   type UserValidator,
   useRewardVaultIncentives,
@@ -46,7 +46,7 @@ const _GaugeDetails = ({ gaugeAddress }: { gaugeAddress: Address }) => {
     isLoading: isGaugeLoading,
     error: gaugeError,
     isValidating: isGaugeValidating,
-  } = useSelectedGauge(gaugeAddress);
+  } = useRewardVault(gaugeAddress);
 
   const router = useRouter();
   const { account } = useBeraJs();
@@ -125,8 +125,8 @@ const _GaugeDetails = ({ gaugeAddress }: { gaugeAddress: Address }) => {
 
           {activeIncentives
             ?.filter((inc) => account && inc.manager === account)
-            .map((inc) => (
-              <Card>
+            .map((inc, idx) => (
+              <Card key={idx}>
                 <CardContent className="md:flex w-full items-center justify-between p-4 pt-4">
                   <div className="flex flex-col items-start pr-4">
                     <div className="text-muted-foregorund font-medium">

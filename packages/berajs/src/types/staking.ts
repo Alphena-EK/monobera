@@ -1,4 +1,4 @@
-import { ValidatorStakedBgtsFragment } from "@bera/graphql/pol";
+import { ValidatorStakedBgtsFragment } from "@bera/graphql/pol/subgraph";
 import { Address } from "viem";
 
 import type { Token } from "./dex";

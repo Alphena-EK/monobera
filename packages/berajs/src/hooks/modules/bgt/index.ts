@@ -8,7 +8,7 @@ export { usePollGlobalData } from "./usePollGlobalData";
 export { useBgtUnstakedBalance } from "./useBgtUnstakedBalance";
 export { useUserVaults, type UserVault } from "./useUserVaults";
 export { useSelectedValidator } from "./useSelectedValidator";
-export { useSelectedGauge } from "./useSelectedGauge";
+export { useRewardVault } from "./useRewardVault";
 export { useSelectedGaugeValidators } from "./useSelectedGaugeValidators";
 export { useClaimableFees } from "./useClaimableFees";
 export { useRewardVaultIncentives } from "./useRewardVaultIncentives";

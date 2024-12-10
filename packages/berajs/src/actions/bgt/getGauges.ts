@@ -1,13 +1,25 @@
+import { bexApiGraphqlClient } from "@bera/graphql";
+import {
+  ApiVaultFragment,
+  GetVaultsDocument,
+  GetVaultsQuery,
+  GetVaultsQueryVariables,
+} from "@bera/graphql/pol/api";
 import { Address } from "viem";
 
 import { BeraConfig, Gauge } from "~/types";
 
 export interface GetGaugeData {
   gaugeCounts: number;
-  gaugeList: Gauge[];
-  gaugeDictionary: { [key: Address]: Gauge };
+  gaugeList: ApiVaultFragment[];
+  gaugeDictionary: {
+    [key: Address]: ApiVaultFragment;
+  };
 }
 
+/**
+ * @deprecated use `GetVaultsQueryVariables['where']` instead
+ */
 export interface GaugeFilter {
   validatorId?: Address;
   filterByProduct?: string[];
@@ -21,40 +33,31 @@ export interface GaugeFilter {
 
 export const getGauges = async (
   config: BeraConfig,
-  filter?: GaugeFilter,
+  filter?: GetVaultsQueryVariables,
 ): Promise<GetGaugeData> => {
-  if (!config.endpoints?.polEndpoint) {
-    throw new Error("Missing backend endpoint in config");
+  const res = await bexApiGraphqlClient.query<
+    GetVaultsQuery,
+    GetVaultsQueryVariables
+  >({
+    query: GetVaultsDocument,
+    variables: filter,
+  });
+
+  if (res.error) {
+    throw res.error;
   }
-  try {
-    let url = `${config.endpoints.polEndpoint}/vaults`;
-    if (filter) {
-      let isFirstParam = true;
-      Object.keys(filter).forEach((key) => {
-        const filterKey = key as keyof typeof filter;
-        url += `${isFirstParam ? "?" : "&"}${filterKey}=${filter[filterKey]}`;
-        isFirstParam = false;
-      });
-    }
-    const res = await fetch(url);
-    const gauges = await res.json();
-    return {
-      gaugeCounts: gauges.total,
-      gaugeList: gauges.vaults,
-      gaugeDictionary: gauges.vaults.reduce(
-        (acc: { [key: Address]: Gauge }, item: Gauge) => {
-          acc[item.id] = item;
-          return acc;
-        },
-        {},
-      ),
-    };
-  } catch (error) {
-    console.error(error);
-    return {
-      gaugeCounts: 0,
-      gaugeList: [],
-      gaugeDictionary: {},
-    };
-  }
+
+  const vaults = res.data.polGetRewardVaults;
+
+  return {
+    gaugeCounts: vaults.length,
+    gaugeList: vaults,
+    gaugeDictionary: vaults.reduce(
+      (acc: { [key: Address]: ApiVaultFragment }, item) => {
+        acc[item.vaultAddress as Address] = item;
+        return acc;
+      },
+      {},
+    ),
+  };
 };

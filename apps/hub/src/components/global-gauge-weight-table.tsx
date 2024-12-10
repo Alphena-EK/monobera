@@ -16,7 +16,7 @@ import type {
   Updater,
 } from "@tanstack/react-table";
 
-import { GlobalGaugeWeightColumns } from "~/columns/global-gauge-weight-columns";
+import { AllRewardVaultColumns } from "~/columns/global-gauge-weight-columns";
 
 const GAUGE_PAGE_SIZE = 10;
 
@@ -37,14 +37,14 @@ export default function GlobalGaugeWeightTable({
     { id: "activeIncentivesInHoney", desc: true },
   ]);
 
-  const { gaugeCounts, gaugeList, isLoading, isValidating } = usePollGauges(
+  const { data, isLoading, isValidating } = usePollGauges(
     {
-      sortBy: sorting[0]?.id as
+      orderBy: sorting[0]?.id as
         | "activeIncentivesInHoney"
         | "amountstaked"
         | "bgtInflationCapture"
         | undefined,
-      sortOrder: sorting[0]?.desc ? "desc" : "asc",
+      orderDirection: sorting[0]?.desc ? "desc" : "asc",
       page: page + 1,
       filterByProduct: markets,
       pageSize: GAUGE_PAGE_SIZE,
@@ -52,6 +52,9 @@ export default function GlobalGaugeWeightTable({
     },
     { opts: { keepPreviousData: true } },
   );
+
+  const gaugeList = data?.gaugeList ?? [];
+  const gaugeCounts = data?.gaugeCounts ?? 0;
 
   const fetchData = useCallback(
     (state: TableState) => {
@@ -88,7 +91,7 @@ export default function GlobalGaugeWeightTable({
 
   const allGaugeTable = useAsyncTable({
     fetchData: fetchData,
-    columns: GlobalGaugeWeightColumns as ColumnDef<Gauge>[],
+    columns: AllRewardVaultColumns,
     data: myGauge ? [] : gaugeList ?? [],
     enablePagination: true,
     additionalTableProps: {

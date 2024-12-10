@@ -1,4 +1,4 @@
-import { type GetAllValidatorBlockCountQuery } from "@bera/graphql/pol";
+import { type GetAllValidatorBlockCountQuery } from "@bera/graphql/pol/subgraph";
 import { mutate } from "swr";
 import useSWRImmutable from "swr/immutable";
 

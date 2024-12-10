@@ -10,10 +10,10 @@ export const GaugeHeaderWidget = ({
   address: Address;
   className?: string;
 }) => {
-  const { gaugeDictionary, isLoading } = usePollGauges({
+  const { data: vaultsData, isLoading } = usePollGauges({
     pageSize: 9999,
   });
-  const gauge = gaugeDictionary?.[address];
+  const gauge = vaultsData?.gaugeDictionary?.[address];
 
   const { data } = useTokens();
   const tokenList = data?.tokenList ?? [];
@@ -21,6 +21,7 @@ export const GaugeHeaderWidget = ({
   if (tokenList[0] && tokenList[1]) {
     list = [tokenList[0], tokenList[1]];
   }
+
   return (
     <>
       {isLoading || !gauge ? (
@@ -34,14 +35,17 @@ export const GaugeHeaderWidget = ({
         >
           <div className="text-md flex items-center gap-1 font-medium leading-6">
             <GaugeIcon
-              address={gauge.id}
+              address={gauge.vaultAddress as Address}
               overrideImage={gauge.metadata?.logoURI}
             />
             {gauge.metadata?.name ?? truncateHash(gauge.id)}
           </div>
           <div className="flex items-center gap-1 text-sm font-medium leading-5">
-            <MarketIcon market={gauge.metadata?.product ?? "OTHER"} size="md" />
-            {gauge.metadata?.product ?? "OTHER"}
+            <MarketIcon
+              market={gauge.metadata?.productName ?? "OTHER"}
+              size="md"
+            />
+            {gauge.metadata?.productName ?? "OTHER"}
           </div>
         </div>
       )}

@@ -1,0 +1,90 @@
+fragment ApiVaultIncentive on GqlRewardVaultIncentive {
+  active
+  amountLeft
+  incentiveRate
+
+  token {
+    address
+    name
+    symbol
+    decimals
+  }
+}
+
+fragment ApiVault on GqlRewardVault {
+  id: vaultAddress
+  vaultAddress
+  isVaultWhitelisted
+
+  dynamicData {
+    allTimeBGTReceived
+    apy
+  }
+
+  stakingToken {
+    address
+    name
+    symbol
+    decimals
+  }
+
+  metadata {
+    name
+    name
+    logoURI
+    productName
+  }
+
+  activeIncentivesValueUsd
+
+  activeIncentives {
+    ...ApiVaultIncentive
+  }
+}
+
+query GetVaults(
+  $where: GqlRewardVaultFilter
+  $pageSize: Int
+  $skip: Int
+  $orderBy: GqlRewardVaultOrderBy
+  $orderDirection: GqlRewardVaultOrderDirection
+) {
+  polGetRewardVaults(
+    where: $where
+    first: $pageSize
+    skip: $skip
+    orderBy: $orderBy
+    orderDirection: $orderDirection
+  ) {
+    ...ApiVault
+  }
+}
+
+fragment ApiValidator on GqlValidator {
+  id
+  pubkey
+  operator
+  metadata {
+    name
+    logoURI
+  }
+  rewardAllocationWeights {
+    ...ApiRewardAllocationWeight
+  }
+}
+
+fragment ApiRewardAllocationWeight on GqlValidatorRewardAllocationWeight {
+  percentageNumerator
+  validatorId
+  receivingVault {
+    ...ApiVault
+  }
+  receiver
+  startBlock
+}
+
+query GetValidators($where: GqlValidatorFilter) {
+  polGetValidators(where: $where) {
+    ...ApiValidator
+  }
+}

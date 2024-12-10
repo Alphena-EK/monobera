@@ -3,7 +3,7 @@ import {
   GetAllValidators,
   GetAllValidatorsQueryVariables,
   type GetAllValidatorsQuery,
-} from "@bera/graphql/pol";
+} from "@bera/graphql/pol/subgraph";
 
 import { type BeraConfig } from "~/types";
 

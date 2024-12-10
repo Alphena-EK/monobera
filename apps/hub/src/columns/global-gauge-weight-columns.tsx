@@ -5,13 +5,15 @@ import { type ColumnDef } from "@tanstack/react-table";
 
 import { BribesPopover } from "~/components/bribes-tooltip";
 import { GaugeHeaderWidget } from "~/components/gauge-header-widget";
+import { ApiVaultFragment } from "@bera/graphql/pol/api";
+import { Address } from "viem";
 
-export const GlobalGaugeWeightColumns: ColumnDef<Gauge>[] = [
+export const AllRewardVaultColumns: ColumnDef<ApiVaultFragment>[] = [
   {
     header: "Reward Vaults",
     cell: ({ row }) => (
       <GaugeHeaderWidget
-        address={row.original.vaultAddress}
+        address={row.original.vaultAddress as Address}
         // className="w-[150px]"
       />
     ),
@@ -26,7 +28,7 @@ export const GlobalGaugeWeightColumns: ColumnDef<Gauge>[] = [
         symbol="USD"
         compact={false}
         compactThreshold={999_999_999}
-        value={row.original.activeIncentivesInHoney}
+        value={row.original.activeIncentivesValueUsd}
       />
     ),
     meta: {
@@ -44,7 +46,7 @@ export const GlobalGaugeWeightColumns: ColumnDef<Gauge>[] = [
         compact={false}
         compactThreshold={999_999_999}
         percent
-        value={row.original.bgtInflationCapture / 10000 ?? 0}
+        value={row.original.dynamicData?.apy ?? 0 / 10000}
       />
     ),
     meta: {

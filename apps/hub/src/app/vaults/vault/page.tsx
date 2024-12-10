@@ -2,7 +2,6 @@
 
 import { FC, Suspense } from "react";
 import { notFound, useSearchParams } from "next/navigation";
-import { useSelectedGauge } from "@bera/berajs";
 import { isAddress } from "viem";
 
 import { GaugeDetails } from "../[gaugeAddress]/components/gauge-details";

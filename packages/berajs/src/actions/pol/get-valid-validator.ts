@@ -3,7 +3,7 @@ import {
   GetValidValidator,
   GetValidatorBgtBoostQueryVariables,
   type GetValidValidatorQuery,
-} from "@bera/graphql/pol";
+} from "@bera/graphql/pol/subgraph";
 import { isAddress, type Address } from "viem";
 
 import { BeraConfig } from "~/types";

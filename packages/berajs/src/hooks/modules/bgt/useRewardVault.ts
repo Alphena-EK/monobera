@@ -11,7 +11,7 @@ export interface UsePollValidatorInfoResponse
  *
  * @deprecated should be refactored to use the new endpoint and onchain data
  */
-export const useSelectedGauge = (
+export const useRewardVault = (
   id: Address | undefined,
   options?: DefaultHookOptions,
 ): UsePollValidatorInfoResponse => {

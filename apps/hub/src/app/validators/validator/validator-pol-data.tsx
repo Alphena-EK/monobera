@@ -31,10 +31,10 @@ export const getActiveIncentivesArray = (
 };
 export const ValidatorPolData = ({ validator }: { validator: Validator }) => {
   const {
-    gaugeList,
+    data,
     isLoading: isGaugeListLoading,
     isValidating: isGaugeListValidating,
-  } = usePollGauges({ validatorId: validator?.coinbase });
+  } = usePollGauges({ where: { validatorId: validator?.coinbase } });
 
   const activeIncentivesArray: ActiveIncentiveWithVault[] =
     getActiveIncentivesArray(validator);
@@ -42,7 +42,7 @@ export const ValidatorPolData = ({ validator }: { validator: Validator }) => {
   const gaugesTable = useAsyncTable({
     fetchData: async () => {},
     columns: getValidatorGaugeColumns(validator as Validator),
-    data: gaugeList ?? [],
+    data: data?.gaugeList ?? [],
     additionalTableProps: {
       manualSorting: false,
       meta: {

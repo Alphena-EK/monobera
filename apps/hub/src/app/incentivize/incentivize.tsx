@@ -8,7 +8,7 @@ import {
   truncateHash,
   usePollAllowance,
   useRewardVaultIncentives,
-  useSelectedGauge,
+  useRewardVault,
   useTokenInformation,
   type Token,
 } from "@bera/berajs";
@@ -47,7 +47,7 @@ export const Incentivize = () => {
     data: gaugeInfo,
     isLoading: isGaugeLoading,
     isValidating: isGaugeValidating,
-  } = useSelectedGauge(gauge);
+  } = useRewardVault(gauge);
   if (!gauge && !isGaugeLoading && !isGaugeValidating) return notFound();
 
   const [token, setToken] = useState<Token | undefined>(undefined);
