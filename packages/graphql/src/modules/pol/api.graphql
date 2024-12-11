@@ -68,6 +68,8 @@ fragment ApiValidator on GqlValidator {
   metadata {
     name
     logoURI
+    website
+    description
   }
   dynamicData {
     amountStaked
@@ -76,6 +78,7 @@ fragment ApiValidator on GqlValidator {
     usersQueued
     apy
     bgtCapturePercentage
+    bgtEmittedAllTime
   }
   rewardAllocationWeights {
     ...ApiRewardAllocationWeight

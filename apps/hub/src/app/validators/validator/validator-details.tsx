@@ -1,23 +1,24 @@
 import React from "react";
 import Link from "next/link";
-import { truncateHash, type Validator } from "@bera/berajs";
+import { truncateHash } from "@bera/berajs";
 import { blockExplorerUrl } from "@bera/config";
 import { FormattedNumber, Tooltip, ValidatorIcon } from "@bera/shared-ui";
 import { Icons } from "@bera/ui/icons";
+import { ApiValidatorFragment } from "@bera/graphql/pol/api";
 
 export default function ValidatorDetails({
   validator,
 }: {
-  validator: Validator | undefined;
+  validator: ApiValidatorFragment | undefined;
 }) {
-  console.log("vaaaal", { validator });
-
   const validatorDataItems = [
     {
       title: "BGT emitted",
       value: (
         <div className="text-xl font-semibold">
-          <FormattedNumber value={0} />
+          <FormattedNumber
+            value={validator?.dynamicData?.bgtEmittedAllTime ?? 0}
+          />
         </div>
       ),
       tooltipText: "Amount of BGT emitted by this validator",
@@ -36,7 +37,7 @@ export default function ValidatorDetails({
       value: (
         <span className="text-xl font-semibold">
           <FormattedNumber
-            value={validator?.amountStaked ?? "0"}
+            value={validator?.dynamicData?.amountStaked ?? "0"}
             showIsSmallerThanMin
             symbol="BGT"
           />
@@ -87,7 +88,7 @@ export default function ValidatorDetails({
             </span>
           </div>
           <div className="w-full overflow-hidden text-ellipsis text-foreground">
-            {validator?.metadata?.Description ?? ""}
+            {validator?.metadata?.description ?? ""}
           </div>
         </div>
         <div className="items-left w-full flex-col justify-between gap-4">

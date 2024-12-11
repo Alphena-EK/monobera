@@ -1,8 +1,9 @@
 import { truncateHash, type CuttingBoardWeight } from "@bera/berajs";
+import { ApiRewardAllocationWeightFragment } from "@bera/graphql/pol/api";
 import { GaugeIcon, MarketIcon } from "@bera/shared-ui";
 import uniqolor from "uniqolor";
 
-export type CuttingBoardWeightMega = CuttingBoardWeight & {
+export type CuttingBoardWeightMega = ApiRewardAllocationWeightFragment & {
   percentage: number;
   id: number;
 };

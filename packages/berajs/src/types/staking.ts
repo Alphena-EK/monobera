@@ -2,6 +2,7 @@ import { ValidatorStakedBgtsFragment } from "@bera/graphql/pol/subgraph";
 import { Address } from "viem";
 
 import type { Token } from "./dex";
+import { ApiValidatorFragment } from "@bera/graphql/pol/api";
 
 export interface ValidatorInfo {
   id: Address;
@@ -12,27 +13,7 @@ export interface ValidatorInfo {
   twitter?: string;
 }
 
-export type Validator = {
-  id: Address;
-  coinbase: Address;
-  operator: Address;
-  commission: number;
-  amountStaked: string;
-  amountQueued: string;
-  apy: number;
-  cuttingBoard: { startBlock: string; weights: CuttingBoardWeight[] };
-  rewardRate: string;
-  allTimeData: {
-    allTimeBGTDistributed: number;
-    allTimeHoneyValueTokenRewards: number;
-    allTimeUniqueTokenCount: number;
-    allTimeHoneyValueBgtDirected?: number;
-  };
-  active: boolean;
-  activeIncentives: RewardVaultIncentive[];
-  metadata?: ValidatorInfo;
-  votingPower: number;
-};
+export type Validator = ApiValidatorFragment;
 
 export type UserValidator = Validator & {
   amountDeposited: string;

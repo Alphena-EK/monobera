@@ -38,7 +38,7 @@ export const useUserActiveValidators = (
     const valiList = swrResponse.data;
     return valiList?.find(
       (validator: UserValidator) =>
-        validator.coinbase.toLowerCase() === validatorAddress.toLowerCase(),
+        validator.pubkey.toLowerCase() === validatorAddress.toLowerCase(),
     );
   };
   return {

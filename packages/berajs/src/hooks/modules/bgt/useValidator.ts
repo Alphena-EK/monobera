@@ -3,6 +3,7 @@ import { Address, keccak256 } from "viem";
 import { Validator } from "~/types";
 import { useOnChainValidator } from "./useOnChainValidator";
 import { useSelectedValidator } from "./useSelectedValidator";
+import { ApiValidatorFragment } from "@bera/graphql/pol/api";
 
 export const useValidator = ({ pubkey }: { pubkey: Address }) => {
   const {
@@ -24,15 +25,13 @@ export const useValidator = ({ pubkey }: { pubkey: Address }) => {
             ...indexerValidator,
             ...onChainValidator,
             operator: onChainValidator?.operator ?? indexerValidator?.operator,
-            coinbase: onChainValidator?.coinbase ?? indexerValidator?.coinbase,
+            coinbase: onChainValidator?.pubkey ?? indexerValidator?.pubkey,
             amountStaked:
-              onChainValidator?.amountStaked ?? indexerValidator?.amountStaked,
+              onChainValidator?.dynamicData?.amountStaked ??
+              indexerValidator?.dynamicData?.amountStaked,
             metadata: onChainValidator?.metadata ?? indexerValidator?.metadata,
             id: onChainValidator?.id ?? indexerValidator?.id,
-            activeIncentives:
-              onChainValidator?.activeIncentives ??
-              indexerValidator?.activeIncentives,
-          } as Validator)
+          } as ApiValidatorFragment)
         : null,
     isLoading: isIndexerValidatorLoading || isOnChainValidatorLoading,
     error: indexerValidatorError || onChainValidatorError,

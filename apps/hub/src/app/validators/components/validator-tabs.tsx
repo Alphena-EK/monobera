@@ -17,12 +17,16 @@ import { ValidatorOverview } from "../validator/validator-overview";
 import { ValidatorPolData } from "../validator/validator-pol-data";
 import { ValidatorAnalytics } from "./validator-analytics";
 import { ValidatorConfiguration } from "./validator-configuration";
+import { ApiValidatorFragment } from "@bera/graphql/pol/api";
+import { Address } from "viem";
 
 // import { ValidatorEvents } from "./validator-events";
 
 type ValidatorTabValue = "overview" | "configuration" | "analytics" | "events";
 
-export const ValidatorTabs = ({ validator }: { validator: Validator }) => {
+export const ValidatorTabs = ({
+  validator,
+}: { validator: ApiValidatorFragment }) => {
   const { account } = useBeraJs();
   const { data } = useValidatorByOperator(account ?? "0x");
   const isValidatorWallet =
@@ -98,7 +102,7 @@ export const ValidatorTabs = ({ validator }: { validator: Validator }) => {
       <TabsContent value="analytics">
         <ValidatorAnalytics
           dayRange={dayRange}
-          validatorAddress={validator.coinbase}
+          validatorAddress={validator.pubkey as Address}
         />
       </TabsContent>
       {/* TODO: Uncomment this when we have the events data */}

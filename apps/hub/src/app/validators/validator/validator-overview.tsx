@@ -42,12 +42,15 @@ export const ValidatorDataCard = ({
 export const ValidatorOverview = ({
   validator,
 }: { validator: ApiValidatorFragment }) => {
-  const activeIncentivesArray = validator.rewardAllocationWeights.map(
+  const activeIncentivesArray = validator.rewardAllocationWeights?.map(
     (rv) => rv.receivingVault?.activeIncentives,
   );
 
   const { data: totalBlocks = 0 } = useBlockNumber();
-  const { data, isLoading } = usePollValidatorBlockStats(validator.id);
+  const { data, isLoading } = usePollValidatorBlockStats(
+    validator.id as Address,
+  );
+
   const blocksSigned =
     data?.blockStatsByValidators?.[0]?.allTimeBlockCount ?? 0;
 
@@ -197,7 +200,7 @@ export const ValidatorOverview = ({
         {/* TODO: Uptime need work on beaconkit to add */}
         {/* <Uptime address={validator.id} /> */}
       </div>
-      <UserDelegation validator={validator.id} />
+      <UserDelegation valPubKey={validator.pubkey as Address} />
     </div>
   );
 };

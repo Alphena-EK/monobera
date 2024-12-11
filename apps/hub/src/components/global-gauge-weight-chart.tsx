@@ -10,16 +10,17 @@ import {
   ChartTooltip,
   CuttingBoardWeightMega,
 } from "~/components/chart-tooltip";
+import { ApiRewardAllocationWeightFragment } from "@bera/graphql/pol/api";
 
 export const OTHERS_GAUGES = "Others"; // Identifier for aggregated others
 export const THRESHOLD = 0.04;
 
 export default function GlobalGaugeWeightChart({
-  gaugeWeights = [],
+  gaugeWeights,
   isLoading,
   showTotal = true,
 }: {
-  gaugeWeights: CuttingBoardWeight[] | undefined;
+  gaugeWeights: ApiRewardAllocationWeightFragment[] | undefined;
   totalAmountStaked: string | number;
   globalAmountStaked: string;
   isLoading: boolean;
@@ -31,20 +32,15 @@ export default function GlobalGaugeWeightChart({
   const [othersIndex, setOthersIndex] = useState<number>(-1);
 
   const gauges: CuttingBoardWeightMega[] = useMemo(() => {
-    const gaugeW = (gaugeWeights ?? []).map(
-      (gauge: CuttingBoardWeight, index: number) => ({
-        ...gauge,
-        percentage: Number(gauge.percentageNumerator) / 10000,
-        id: index,
-      }),
-    );
+    const gaugeW = (gaugeWeights ?? []).map((gauge, index: number) => ({
+      ...gauge,
+      percentage: Number(gauge.percentageNumerator) / 10000,
+      id: index,
+    }));
 
-    let othersPercentage = 0;
-    gaugeW.forEach(
-      (gauge: CuttingBoardWeight & { percentage: number; id: number }) => {
-        if (gauge.percentage < THRESHOLD) othersPercentage += gauge.percentage;
-      },
-    );
+    const othersPercentage = gaugeW.reduce((acc, gauge) => {
+      return acc + gauge.percentage < THRESHOLD ? gauge.percentage : 0;
+    }, 0);
 
     const filtered = gaugeW.filter((gauge) => gauge.percentage >= THRESHOLD);
 

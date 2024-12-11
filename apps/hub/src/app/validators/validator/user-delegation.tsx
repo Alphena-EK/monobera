@@ -9,14 +9,14 @@ import { BoostQueue } from "../components/boost-queue";
 import { DelegateModal } from "./delegate-modal";
 import { UnbondModal } from "./unbond-modal";
 
-export const UserDelegation = ({ validator }: { validator: Address }) => {
+export const UserDelegation = ({ valPubKey }: { valPubKey: Address }) => {
   const { data = [], isLoading } = useUserActiveValidators();
   const [isValidatorDataLoading, setIsValidatorDataLoading] = useState(false);
 
   const userStaked = useMemo(() => {
     return data.find(
       (userValidator) =>
-        userValidator.coinbase.toLowerCase() === validator.toLowerCase(),
+        userValidator.pubkey.toLowerCase() === valPubKey.toLowerCase(),
     );
   }, [data]);
   return (
@@ -34,7 +34,7 @@ export const UserDelegation = ({ validator }: { validator: Address }) => {
             />
           ) : null}
           <DelegateModal
-            validator={validator}
+            validator={valPubKey}
             setIsValidatorDataLoading={setIsValidatorDataLoading}
           />
         </div>
@@ -74,7 +74,7 @@ export const UserDelegation = ({ validator }: { validator: Address }) => {
               /> */}
               <BoostQueue
                 setIsValidatorDataLoading={setIsValidatorDataLoading}
-                selectedValidator={validator as string}
+                selectedValidator={valPubKey as string}
               />
             </>
           )}
