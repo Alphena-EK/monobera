@@ -16,12 +16,13 @@ import { Address, parseUnits } from "viem";
 
 import ValidatorInput from "~/components/validator-input";
 import { DelegateEnum, ImageMapEnum } from "./types";
+import { ApiValidatorFragment } from "@bera/graphql/pol/api";
 
 export const UnDelegateContent = ({
-  userValidator,
+  validator,
   setIsValidatorDataLoading,
 }: {
-  userValidator: UserValidator;
+  validator: ApiValidatorFragment;
   setIsValidatorDataLoading: (loading: boolean) => void;
 }) => {
   const { isConnected, account } = useBeraJs();
@@ -48,11 +49,11 @@ export const UnDelegateContent = ({
   });
 
   const selectedValidator = data?.find(
-    (v) => v.coinbase.toLowerCase() === userValidator.coinbase.toLowerCase(),
+    (v) => v.pubkey.toLowerCase() === validator.pubkey.toLowerCase(),
   );
 
   const bgtDelegated = selectedValidator
-    ? selectedValidator.amountDeposited
+    ? selectedValidator.userBoosts.activeBoosts
     : "0";
 
   return (
@@ -84,7 +85,7 @@ export const UnDelegateContent = ({
           action={DelegateEnum.UNBOND}
           amount={amount}
           onAmountChange={setAmount}
-          validatorAddress={userValidator.coinbase as Address}
+          validatorAddress={validator.pubkey as Address}
           showDelegated
           showSearch={false}
           unselectable
@@ -99,7 +100,7 @@ export const UnDelegateContent = ({
             className="w-full"
             disabled={
               !account || // no account connected
-              !userValidator || // no validator selected
+              !validator || // no validator selected
               isUnbondLoading || // unbond action processing
               Number(amount) > Number(bgtDelegated) ||
               !amount ||
@@ -111,7 +112,7 @@ export const UnDelegateContent = ({
                 abi: BGT_ABI,
                 functionName: "queueDropBoost",
                 params: [
-                  userValidator.coinbase as Address,
+                  validator.pubkey as Address,
                   parseUnits(amount ?? "0", 18),
                 ],
               })

@@ -104,7 +104,7 @@ export const ValidatorOverview = ({
 
   return (
     <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-      <div className="mt-2 flex flex-col gap-2">
+      <div className="flex flex-col gap-2">
         {/* TODO: Binary Version?!? */}
         {/* <div className="flex justify-end text-sm text-muted-foreground">
           {"Binary Version: V9.41"}
@@ -164,20 +164,16 @@ export const ValidatorOverview = ({
           />
           <ValidatorDataCard
             className="h-[130px]"
-            title="Avg. Reward Rate (Per Block Proposal)"
+            title="APY"
             value={
               <div className="flex flex-col items-start gap-1">
                 <div className="relative flex w-full flex-row gap-1">
                   <FormattedNumber
-                    value={validator.rewardRate ?? 0}
+                    value={0}
+                    percent
                     className="text-2xl font-semibold"
                   />
-                  <Icons.bgt className="h-6 w-6 self-center" />
                 </div>
-                {/* TODO: Ask to get delta by month of reward rate on subgraph */}
-                {/* <span className="overflow-hidden text-ellipsis whitespace-nowrap text-sm text-muted-foreground">
-                  {"+2.5% from last month"}
-                </span> */}
               </div>
             }
           />
@@ -200,7 +196,7 @@ export const ValidatorOverview = ({
         {/* TODO: Uptime need work on beaconkit to add */}
         {/* <Uptime address={validator.id} /> */}
       </div>
-      <UserDelegation valPubKey={validator.pubkey as Address} />
+      <UserDelegation validator={validator} />
     </div>
   );
 };

@@ -1,10 +1,10 @@
 import useSWR from "swr";
 
-import { getGauges } from "~/actions/bgt/getGauges";
+import { getRewardVaults } from "~/actions/bgt/getRewardVaults";
 import { DefaultHookOptions, useBeraJs } from "../../..";
 import { GetVaultsQueryVariables } from "@bera/graphql/pol/api";
 
-export const usePollGauges = (
+export const useRewardVaults = (
   filter?: GetVaultsQueryVariables,
   options?: DefaultHookOptions,
 ) => {
@@ -14,7 +14,7 @@ export const usePollGauges = (
   const swrResponse = useSWR(
     QUERY_KEY,
     async () => {
-      return await getGauges(config, filter);
+      return await getRewardVaults(config, filter);
     },
     {
       ...options?.opts,

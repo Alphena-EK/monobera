@@ -1,25 +1,20 @@
-import { BeraConfig, CuttingBoardWeight } from "~/types";
-
-export interface GetGlobalCuttingBoard {
-  globalCBWs: CuttingBoardWeight[];
-}
+import { BeraConfig } from "~/types";
+import { getRewardVaults } from "./getRewardVaults";
+import {
+  ApiVaultFragment,
+  GqlRewardVaultOrderBy,
+  GqlRewardVaultOrderDirection,
+} from "@bera/graphql/pol/api";
 
 export const getGlobalCuttingBoard = async (
   threshold: number,
   config: BeraConfig,
-): Promise<GetGlobalCuttingBoard> => {
-  if (!config.endpoints?.polEndpoint) {
-    throw new Error("Missing backend endpoint in config");
-  }
-  try {
-    const res = await fetch(
-      `${config.endpoints.polEndpoint}/global_cutting_boards?threshold=${threshold}`,
-    );
-    return await res.json();
-  } catch (error) {
-    console.error(error);
-    return {
-      globalCBWs: [],
-    };
-  }
+): Promise<ApiVaultFragment[]> => {
+  const { gaugeList } = await getRewardVaults(config, {
+    // TODO sort by bgt capture percentage
+    orderBy: GqlRewardVaultOrderBy.Apy,
+    orderDirection: GqlRewardVaultOrderDirection.Desc,
+    pageSize: threshold,
+  });
+  return gaugeList;
 };

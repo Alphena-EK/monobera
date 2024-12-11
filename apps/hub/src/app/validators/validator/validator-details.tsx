@@ -5,12 +5,15 @@ import { blockExplorerUrl } from "@bera/config";
 import { FormattedNumber, Tooltip, ValidatorIcon } from "@bera/shared-ui";
 import { Icons } from "@bera/ui/icons";
 import { ApiValidatorFragment } from "@bera/graphql/pol/api";
+import { Address } from "viem";
 
 export default function ValidatorDetails({
   validator,
 }: {
   validator: ApiValidatorFragment | undefined;
 }) {
+  console.log({ validator });
+
   const validatorDataItems = [
     {
       title: "BGT emitted",
@@ -37,7 +40,7 @@ export default function ValidatorDetails({
       value: (
         <span className="text-xl font-semibold">
           <FormattedNumber
-            value={validator?.dynamicData?.amountStaked ?? "0"}
+            value={validator?.dynamicData?.amountStaked ?? "10"}
             showIsSmallerThanMin
             symbol="BGT"
           />
@@ -71,7 +74,7 @@ export default function ValidatorDetails({
         <div className="items-left w-full flex-col justify-evenly gap-4">
           <div className="flex w-full items-center justify-start gap-2 text-xl font-bold leading-[48px]">
             <ValidatorIcon
-              address={validator?.id}
+              address={validator?.pubkey as Address}
               className="h-12 w-12"
               imgOverride={validator?.metadata?.logoURI}
             />

@@ -12,9 +12,7 @@ import {
 } from "@bera/graphql/pol/api";
 import { Address } from "viem";
 
-export const getValidatorGaugeColumns = (
-  validator: ApiRewardAllocationWeightFragment[],
-) => {
+export const getValidatorGaugeColumns = () => {
   const validatorGaugeColumns: ColumnDef<ApiRewardAllocationWeightFragment>[] =
     [
       {
@@ -93,14 +91,13 @@ export const getValidatorGaugeColumns = (
             }
           />
         ),
-        cell: ({ row }) => (
-          <div className="flex items-center gap-1">
-            <BribesPopover
-              incentives={Number(
-                row.original.receivingVault?.activeIncentivesValueUsd ?? 0,
-              )}
-            />
-            {/* <Button
+        cell: ({ row }) => {
+          return (
+            <div className="flex items-center gap-1">
+              <BribesPopover
+                incentives={row.original.receivingVault?.activeIncentives}
+              />
+              {/* <Button
             size="sm"
             variant="ghost"
             onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
@@ -114,8 +111,9 @@ export const getValidatorGaugeColumns = (
           >
             Add
           </Button> */}
-          </div>
-        ),
+            </div>
+          );
+        },
         accessorKey: "incentives",
         enableSorting: false,
       },

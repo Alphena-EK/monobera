@@ -1,24 +1,32 @@
 import { useState } from "react";
-import { UserValidator } from "@bera/berajs";
+import { UserValidator, useUserBoostsOnValidator } from "@bera/berajs";
 import { Button } from "@bera/ui/button";
 import { Dialog, DialogContent } from "@bera/ui/dialog";
 
 import { UnDelegateContent } from "./undelegate-content";
+import { ApiValidatorFragment } from "@bera/graphql/pol/api";
+import { Address } from "viem";
 
 export const UnbondModal = ({
-  userValidator,
+  validator,
   setIsValidatorDataLoading,
 }: {
-  userValidator: UserValidator;
+  validator: ApiValidatorFragment | undefined;
   setIsValidatorDataLoading: (loading: boolean) => void;
 }) => {
   const [open, setOpen] = useState(false);
+
+  const { data: userBoosts } = useUserBoostsOnValidator({
+    pubkey: validator?.pubkey as Address,
+  });
+
+  if (!validator) return null;
   return (
     <>
       <Button
         variant="ghost"
         onClick={() => setOpen(true)}
-        disabled={Number(userValidator.amountDeposited) <= 0}
+        disabled={Number(userBoosts?.activeBoosts) <= 0}
       >
         Unboost
       </Button>
@@ -26,7 +34,7 @@ export const UnbondModal = ({
         <DialogContent className="w-full md:w-[550px]">
           <UnDelegateContent
             setIsValidatorDataLoading={setIsValidatorDataLoading}
-            userValidator={userValidator}
+            validator={validator}
           />
         </DialogContent>
       </Dialog>

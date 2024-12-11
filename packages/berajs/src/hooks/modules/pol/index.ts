@@ -8,8 +8,7 @@ export { usePollValidatorBlockRewardStats } from "./hooks/poll-validator-block-r
 export { usePollValidatorBlockStats } from "./hooks/poll-validator-block-stats";
 export { useAllValidators } from "./hooks/useAllValidators";
 export { usePollValidatorTokenRewards } from "./hooks/poll-validator-token-rewards";
-export { useUserActiveValidators } from "./hooks/poll-user-active-validators";
-export { useValidValidator } from "./hooks/poll-valid-validator";
+export { useUserActiveValidators } from "./hooks/useUserActiveValidators";
 export * from "./hooks/useRewardVaultBalanceFromStakingToken";
 export { useRewardVaultFromToken } from "./hooks/useRewardVaultFromToken";
 export { usePollRewardVault } from "./hooks/poll-reward-vault";
@@ -22,3 +21,4 @@ export { useValidatorQueuedRewardAllocation } from "./hooks/useValidatorQueuedRe
 export { useValidatorByOperator } from "./hooks/useValidatorByOperator";
 export { useValidatorQueuedOperatorAddress } from "./hooks/useValidatorQueuedOperatorAddress";
 export { useValidatorOperatorAddress } from "./hooks/useValidatorOperatorAddress";
+export { useUserBoostsOnValidator } from "./hooks/useUserBoostsOnValidator";

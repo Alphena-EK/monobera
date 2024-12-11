@@ -1,4 +1,4 @@
-import { truncateHash, usePollGauges, useTokens } from "@bera/berajs";
+import { truncateHash, useRewardVaults, useTokens } from "@bera/berajs";
 import { GaugeIcon, MarketIcon, TokenIconList } from "@bera/shared-ui";
 import { cn } from "@bera/ui";
 import { Address } from "viem";
@@ -10,7 +10,7 @@ export const GaugeHeaderWidget = ({
   address: Address;
   className?: string;
 }) => {
-  const { data: vaultsData, isLoading } = usePollGauges({
+  const { data: vaultsData, isLoading } = useRewardVaults({
     pageSize: 9999,
   });
   const gauge = vaultsData?.gaugeDictionary?.[address];

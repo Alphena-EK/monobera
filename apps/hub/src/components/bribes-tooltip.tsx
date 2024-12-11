@@ -54,15 +54,14 @@ export const BribesTooltip = ({
   activeIncentive: ApiVaultIncentiveFragment[];
 }) => {
   const { data: tokenHoneyPrices } = useTokenHoneyPrices({
-    tokenAddresses: activeIncentive.map(
-      (ab: RewardVaultIncentive) => ab.token.address,
-    ) as Address[],
+    tokenAddresses: activeIncentive.map((ab) => ab.token.address) as Address[],
   });
   const totalBribesValue: TotalValues = activeIncentive.reduce(
-    (acc: TotalValues, ab: RewardVaultIncentive) => {
+    (acc: TotalValues, ab) => {
       const tokenPrice = parseFloat(
         tokenHoneyPrices?.[ab.token.address] ?? "0",
       );
+      console.log({ ab });
       return {
         totalIncentives: acc.totalIncentives + ab.amountRemaining * tokenPrice,
         amountPerProposal:
@@ -78,7 +77,7 @@ export const BribesTooltip = ({
   const others: TotalValues | undefined =
     activeIncentive.length > 5
       ? activeIncentive.reduce(
-          (acc: TotalValues, ab: RewardVaultIncentive) => {
+          (acc: TotalValues, ab) => {
             const tokenPrice = parseFloat(
               tokenHoneyPrices?.[ab.token.address] ?? "0",
             );
@@ -98,7 +97,7 @@ export const BribesTooltip = ({
 
   return (
     <div className="flex w-[250px] flex-col gap-1 p-1">
-      {activeIncentive.map((ab: RewardVaultIncentive, i: number) => {
+      {activeIncentive.map((ab, i) => {
         if (i > 4) {
           return;
         }
@@ -156,43 +155,6 @@ export const BribesTooltip = ({
   );
 };
 
-export const ClaimBribesPopover = ({
-  bribes,
-  coinbase,
-}: {
-  bribes: RewardVaultIncentive[] | undefined;
-  coinbase: Address;
-}) => {
-  return (
-    <>
-      {!bribes || bribes?.length === 0 ? (
-        <div className="w-fit rounded-lg border px-2 py-1 text-xs hover:bg-muted">
-          No Incentives
-        </div>
-      ) : (
-        <div className="flex flex-row items-center gap-1">
-          <Tooltip
-            toolTipTrigger={
-              <div className="w-fit rounded-lg border px-2 py-1 hover:bg-muted">
-                <TokenIconList
-                  tokenList={bribes?.map((ab) => ab.token) ?? []}
-                  showCount={3}
-                  size={"lg"}
-                  className="w-fit"
-                />
-              </div>
-            }
-            children={
-              <BribesTooltip activeIncentive={[]} key="ClaimBribesPopover" />
-            }
-          />
-          <Button disabled>Claim</Button>
-        </div>
-      )}
-    </>
-  );
-};
-
 export const BribesPopover = ({
   incentives,
 }: {
@@ -210,10 +172,12 @@ export const BribesPopover = ({
             <div className="w-fit rounded-lg p-1 hover:bg-muted">
               <TokenIconList
                 tokenList={
-                  incentives?.map((incentive) => ({
-                    ...incentive.token,
-                    id: incentive.tokenAddress,
-                  })) ?? []
+                  incentives
+                    ?.filter((i) => i!)
+                    .map((incentive) => ({
+                      ...incentive!.token,
+                      id: incentive!.tokenAddress,
+                    })) ?? []
                 }
                 showCount={3}
                 size={"lg"}

@@ -20,6 +20,7 @@ fragment ApiVault on GqlRewardVault {
   dynamicData {
     allTimeBGTReceived
     apy
+    bgtCapturePercentage
   }
 
   stakingToken {
@@ -95,11 +96,15 @@ fragment ApiRewardAllocationWeight on GqlValidatorRewardAllocationWeight {
   startBlock
 }
 
-query GetValidators($where: GqlValidatorFilter) {
+query GetValidators(
+  $where: GqlValidatorFilter
+  $sortBy: GqlValidatorOrderBy = amountStaked
+  $sortOrder: GqlValidatorOrderDirection = desc
+) {
   validators: polGetValidators(
     where: $where
-    orderBy: amountStaked
-    orderDirection: desc
+    orderBy: $sortBy
+    orderDirection: $sortOrder
   ) {
     ...ApiValidator
   }

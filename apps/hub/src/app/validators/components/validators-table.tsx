@@ -14,6 +14,7 @@ import { AllValidator } from "./all-validator";
 import { BoostQueue } from "./boost-queue";
 import { MyValidator } from "./my-validators";
 import { ApiRewardAllocationWeightFragment } from "@bera/graphql/pol/api";
+import { ValidatorWithUserBoost } from "@bera/berajs/actions";
 
 export const CuttingBoardDisplay = ({
   cuttingBoard,
@@ -128,9 +129,9 @@ export default function ValidatorsTable() {
             isTyping={isTyping}
             page={allValidatorPage}
             setPage={setAllValidatorPage}
-            onRowClick={(row: any) =>
-              router.push(getHubValidatorPath(row.original.pubkey))
-            }
+            onRowClick={(row: any) => {
+              router.push(getHubValidatorPath(row.original.pubkey));
+            }}
             onRowHover={(row: any) =>
               router.prefetch(getHubValidatorPath(row.original.pubkey))
             }
@@ -139,9 +140,9 @@ export default function ValidatorsTable() {
         <TabsContent value="my-validators">
           <MyValidator
             keyword={keyword}
-            onRowClick={(row: any) =>
-              router.push(getHubValidatorPath(row.original.coinbase))
-            }
+            onRowClick={(row: any) => {
+              router.push(getHubValidatorPath(row.original.pubkey));
+            }}
           />
         </TabsContent>
         <TabsContent value="queued">

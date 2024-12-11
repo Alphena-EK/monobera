@@ -46,11 +46,11 @@ export default function ValidatorInput({
   const { data } = useUserActiveValidators();
 
   const selectedValidator = data?.find(
-    (validator: UserValidator) =>
-      validator.coinbase.toLowerCase() === validatorAddress?.toLowerCase(),
+    (validator) =>
+      validator.pubkey.toLowerCase() === validatorAddress?.toLowerCase(),
   );
   const bgtDelegated = selectedValidator
-    ? selectedValidator.amountDeposited
+    ? selectedValidator.userBoosts.activeBoosts
     : "0";
   return (
     <div className="relative">

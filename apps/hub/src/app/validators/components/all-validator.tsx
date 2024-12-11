@@ -14,6 +14,10 @@ import type {
 } from "@tanstack/react-table";
 
 import { generalValidatorColumns } from "~/columns/general-validator-columns";
+import {
+  GqlValidatorOrderBy,
+  GqlValidatorOrderDirection,
+} from "@bera/graphql/pol/api";
 
 const VALIDATOR_PAGE_SIZE = 10;
 
@@ -41,11 +45,11 @@ export const AllValidator = ({
     isLoading,
     isValidating,
   } = useAllValidators({
-    sortBy: sorting[0]?.id as "commission" | "apy" | "votingpower" | undefined,
-    sortOrder: sorting[0]?.desc ? "desc" : "asc",
-    page: page + 1,
-    pageSize: VALIDATOR_PAGE_SIZE,
-    query: isTyping ? "" : keyword,
+    sortBy: sorting[0]?.id as GqlValidatorOrderBy,
+    sortOrder: (sorting[0]?.desc
+      ? "desc"
+      : "asc") as GqlValidatorOrderDirection,
+    // query: isTyping ? "" : keyword,
   });
 
   const {
@@ -59,6 +63,8 @@ export const AllValidator = ({
   const fetchData = useCallback(
     (state: TableState) => {
       setPage(state?.pagination?.pageIndex);
+      console.log("SETTING SORT", state?.sorting);
+
       setSorting(state?.sorting);
     },
     [setPage],

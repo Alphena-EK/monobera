@@ -1,5 +1,5 @@
 export { usePollMarkets } from "./usePollMarkets";
-export { usePollGauges } from "./usePollGauges";
+export { useRewardVaults } from "./useRewardVaults";
 export { useBgtApy } from "./useBgtApy";
 export { usePollUserQueuedBoost } from "./usePollUserQueuedBoost";
 export { usePollVaultsInfo } from "./usePollVaultsInfo";
@@ -7,7 +7,8 @@ export { usePollGlobalData } from "./usePollGlobalData";
 export { useBgtUnstakedBalance } from "./useBgtUnstakedBalance";
 export { useUserVaults, type UserVault } from "./useUserVaults";
 export { useSelectedValidator } from "./useSelectedValidator";
-export { useRewardVault } from "./useRewardVault";
+export * from "./useRewardVault";
+export * from "./useRewardVaults";
 export { useSelectedGaugeValidators } from "./useSelectedGaugeValidators";
 export { useClaimableFees } from "./useClaimableFees";
 export { useRewardVaultIncentives } from "./useRewardVaultIncentives";

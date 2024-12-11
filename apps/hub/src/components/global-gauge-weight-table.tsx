@@ -2,14 +2,13 @@
 
 import React, { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
-import { usePollGauges, type Gauge } from "@bera/berajs";
+import { useRewardVaults, type Gauge } from "@bera/berajs";
 import {
   SimpleTable,
   getRewardsVaultUrl,
   useAsyncTable,
 } from "@bera/shared-ui";
 import type {
-  ColumnDef,
   PaginationState,
   SortingState,
   TableState,
@@ -17,6 +16,10 @@ import type {
 } from "@tanstack/react-table";
 
 import { AllRewardVaultColumns } from "~/columns/global-gauge-weight-columns";
+import {
+  GqlRewardVaultOrderBy,
+  GqlRewardVaultOrderDirection,
+} from "@bera/graphql/pol/api";
 
 const GAUGE_PAGE_SIZE = 10;
 
@@ -34,21 +37,19 @@ export default function GlobalGaugeWeightTable({
   const router = useRouter();
   const [page, setPage] = useState(0);
   const [sorting, setSorting] = useState([
-    { id: "activeIncentivesInHoney", desc: true },
+    { id: GqlRewardVaultOrderBy.AllTimeBgtReceived, desc: true },
   ]);
 
-  const { data, isLoading, isValidating } = usePollGauges(
+  const { data, isLoading, isValidating } = useRewardVaults(
     {
-      orderBy: sorting[0]?.id as
-        | "activeIncentivesInHoney"
-        | "amountstaked"
-        | "bgtInflationCapture"
-        | undefined,
-      orderDirection: sorting[0]?.desc ? "desc" : "asc",
-      page: page + 1,
-      filterByProduct: markets,
+      orderBy: sorting[0]?.id as GqlRewardVaultOrderBy,
+      orderDirection: (sorting[0]?.desc
+        ? "desc"
+        : "asc") as GqlRewardVaultOrderDirection,
+      skip: GAUGE_PAGE_SIZE * page,
+      // filterByProduct: markets,
       pageSize: GAUGE_PAGE_SIZE,
-      query: isTyping ? "" : keywords,
+      // query: isTyping ? "" : keywords,
     },
     { opts: { keepPreviousData: true } },
   );

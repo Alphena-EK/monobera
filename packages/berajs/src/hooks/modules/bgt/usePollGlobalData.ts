@@ -39,7 +39,7 @@ export const usePollGlobalData = (
         ]);
       return {
         bgtTotalSupply,
-        globalCuttingBoard: globalCuttingBoard.globalCBWs,
+        globalCuttingBoard: globalCuttingBoard,
         ...globalData,
       } as any;
     },

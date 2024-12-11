@@ -35,7 +35,7 @@ export const AllRewardVaultColumns: ColumnDef<ApiVaultFragment>[] = [
       tooltip: "The total value of incentives in the gauge.",
       headerClassname: "flex-initial whitespace-nowrap",
     },
-    accessorKey: "activeIncentivesInHoney",
+    accessorKey: "allTimeBGTReceived",
     enableSorting: true,
   },
   {
@@ -44,18 +44,17 @@ export const AllRewardVaultColumns: ColumnDef<ApiVaultFragment>[] = [
       <FormattedNumber
         className="pl-2 justify-start"
         compact={false}
-        compactThreshold={999_999_999}
         percent
-        value={row.original.dynamicData?.apy ?? 0 / 10000}
+        value={row.original.dynamicData?.bgtCapturePercentage ?? 0 / 10000}
       />
     ),
     meta: {
       tooltip: "The percentage of global BGT captured by the gauge.",
       headerClassname: "flex-initial whitespace-nowrap",
     },
-    accessorKey: "bgtInflationCapture",
+    accessorKey: "dynamicData.bgtInflationCapture",
     // TODO: fix sorting for bgtInflationCapture
-    enableSorting: false,
+    enableSorting: true,
   },
   // {
   //   header: ({ column }) => (

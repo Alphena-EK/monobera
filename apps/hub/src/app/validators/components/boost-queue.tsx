@@ -2,13 +2,12 @@ import { useMemo, useState } from "react";
 import {
   BGT_ABI,
   IContractWrite,
-  type UserValidator,
   TransactionActionType,
   truncateHash,
   useBgtUnstakedBalance,
   useUserActiveValidators,
-  useValidatorList,
   useBeraJs,
+  useAllValidators,
 } from "@bera/berajs";
 import { bgtTokenAddress } from "@bera/config";
 import {
@@ -21,7 +20,8 @@ import { cn } from "@bera/ui";
 import { Button } from "@bera/ui/button";
 import { Skeleton } from "@bera/ui/skeleton";
 import { Address, parseUnits } from "viem";
-import { useBlock } from "wagmi";
+import { useBlockNumber } from "wagmi";
+import { ValidatorWithUserBoost } from "@bera/berajs/actions";
 
 export const HISTORY_BUFFER = 8192;
 
@@ -37,30 +37,28 @@ export const BoostQueue = ({
   const { data = [], refresh } = useUserActiveValidators();
   const { refresh: refreshBalance } = useBgtUnstakedBalance();
 
-  const result = useBlock();
-  const blockNumber = result?.data?.number;
+  const { data: blockNumber } = useBlockNumber();
 
   const queuedList = useMemo(() => {
     return !data || !blockNumber || !data.length
       ? []
       : data
-          .filter((validator: UserValidator) => {
-            return parseFloat(validator.amountQueued) !== 0;
+          .filter((validator) => {
+            return parseFloat(validator.userBoosts.queuedBoosts) !== 0;
           })
-          .map((validator: UserValidator) => {
+          .map((validator) => {
             return {
               ...validator,
               canActivate:
-                parseInt(validator.latestBlock) +
+                validator.userBoosts?.queueBoostStartBlock +
                   HISTORY_BUFFER -
                   Number(blockNumber) <=
                 0,
             };
           })
-          .filter((validator: UserValidator) => {
+          .filter((validator) => {
             return selectedValidator !== undefined
-              ? validator.coinbase.toLowerCase() ===
-                  selectedValidator.toLowerCase()
+              ? validator.id.toLowerCase() === selectedValidator.toLowerCase()
               : true;
           });
   }, [data, blockNumber]);
@@ -68,6 +66,8 @@ export const BoostQueue = ({
   const [hasSubmittedTxn, setHasSubmittedTxn] = useState<
     Record<number, boolean>
   >({} as any);
+
+  console.log({ hasSubmittedTxn });
 
   const {
     write: activateWrite,
@@ -110,6 +110,8 @@ export const BoostQueue = ({
     isActivate: boolean,
     props: IContractWrite,
   ) => {
+    console.log("handleTransaction", index, isActivate);
+
     setHasSubmittedTxn({ ...hasSubmittedTxn, [index]: true } as any);
     if (isActivate) {
       activateWrite(props);
@@ -134,14 +136,14 @@ export const BoostQueue = ({
         </div>
       ) : (
         <>
-          {queuedList?.map((validator: UserValidator, index: number) => (
+          {queuedList?.map((validator, index: number) => (
             <ConfirmationCard
-              key={validator.coinbase}
+              key={validator.pubkey}
               userValidator={validator}
               index={index}
               hasSubmittedTxn={hasSubmittedTxn[index] ?? false}
               blocksLeft={
-                parseInt(validator.latestBlock) +
+                Number(validator.userBoosts.queueBoostStartBlock) +
                 HISTORY_BUFFER -
                 Number(blockNumber)
               }
@@ -166,7 +168,7 @@ const ConfirmationCard = ({
   hasSubmittedTxn,
   handleTransaction,
 }: {
-  userValidator: UserValidator;
+  userValidator: ValidatorWithUserBoost;
   blocksLeft: number;
   isTxnLoading: boolean;
   index: number;
@@ -177,21 +179,37 @@ const ConfirmationCard = ({
     props: IContractWrite,
   ) => void;
 }) => {
+  const { data: block } = useBlockNumber();
+
   const { account } = useBeraJs();
-  const width = userValidator.canActivate
+
+  const isReadyForConfirmation =
+    Number(userValidator.userBoosts.queueBoostStartBlock) +
+      HISTORY_BUFFER -
+      Number(block) <
+    0;
+  const width = isReadyForConfirmation
     ? 100
     : Math.round(Math.abs(1 - blocksLeft / HISTORY_BUFFER) * 100);
 
+  console.log({
+    block,
+    userValidator,
+    blocksLeft,
+    isTxnLoading,
+    hasSubmittedTxn,
+  });
+
   const timeText = (
-    <span className=" text-info-foreground">{blocksLeft} blocks remaining</span>
+    <span className="text-info-foreground">{blocksLeft} blocks remaining</span>
   );
 
-  const { data } = useValidatorList();
+  const { data } = useAllValidators();
 
-  const coinbase = userValidator.coinbase;
-  const validatorInfo = data?.validatorDictionary
-    ? data.validatorDictionary[coinbase]
-    : undefined;
+  const coinbase = userValidator.pubkey;
+  const validatorInfo = data?.validators.find(
+    (v) => v.pubkey.toLowerCase() === coinbase.toLowerCase(),
+  );
 
   return (
     <div className="w-full rounded-md border border-border p-4">
@@ -199,18 +217,19 @@ const ConfirmationCard = ({
         <div className="font-medium">
           <div className="flex items-center gap-2">
             <ValidatorIcon
-              address={userValidator.coinbase as Address}
+              address={userValidator.pubkey as Address}
               className="h-8 w-8"
               // imgOverride={userValidator.metadata?.logoURI}
             />
             <div>
-              {validatorInfo?.name ?? truncateHash(userValidator.coinbase)}
+              {validatorInfo?.metadata?.name ??
+                truncateHash(userValidator.pubkey)}
             </div>
           </div>
           <div className="ml-8 text-muted-foreground ">
             <FormattedNumber
               showIsSmallerThanMin
-              value={userValidator.amountQueued}
+              value={userValidator.userBoosts.queuedBoosts}
               compact
             />{" "}
             BGT
@@ -220,14 +239,14 @@ const ConfirmationCard = ({
           <Button
             variant="ghost"
             disabled={
-              isTxnLoading || !userValidator.canActivate || hasSubmittedTxn
+              isTxnLoading || !isReadyForConfirmation || hasSubmittedTxn
             }
             onClick={() =>
               handleTransaction(index, true, {
                 address: bgtTokenAddress,
                 abi: BGT_ABI,
                 functionName: "activateBoost",
-                params: [account!, userValidator.coinbase],
+                params: [account!, userValidator.pubkey],
               })
             }
           >
@@ -242,8 +261,8 @@ const ConfirmationCard = ({
                 abi: BGT_ABI,
                 functionName: "cancelBoost",
                 params: [
-                  userValidator.coinbase,
-                  parseUnits(userValidator.amountQueued, 18),
+                  userValidator.pubkey,
+                  parseUnits(userValidator.userBoosts.queuedBoosts, 18),
                 ],
               })
             }
@@ -257,7 +276,7 @@ const ConfirmationCard = ({
         <div className="h-[9px] overflow-hidden rounded border border-border">
           <div
             className={cn(
-              userValidator.canActivate
+              isReadyForConfirmation
                 ? "bg-success-foreground"
                 : "bg-info-foreground",
               "h-full",
@@ -266,14 +285,14 @@ const ConfirmationCard = ({
           />
         </div>
         <div className="flex justify-between pt-2 text-sm font-medium leading-6">
-          {userValidator.canActivate ? (
+          {blocksLeft < 0 ? (
             <div className="text-success-foreground">
               Ready for confirmation
             </div>
           ) : (
             <div>Confirmation Wait Duration</div>
           )}
-          <div>{!userValidator.canActivate && timeText}</div>
+          <div>{blocksLeft > 0 && timeText}</div>
         </div>
       </div>
     </div>

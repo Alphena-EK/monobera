@@ -15,6 +15,7 @@ import { ApiValidatorFragment } from "@bera/graphql/pol/api";
 import { CuttingBoardDisplay } from "~/app/validators/components/validators-table";
 import { BribesPopover } from "~/components/bribes-tooltip";
 import { useValidatorEstimatedBgtPerYear } from "~/hooks/useValidatorEstimatedBgtPerYear";
+import { ValidatorWithUserBoost } from "@bera/berajs/actions";
 
 const VALIDATOR_COLUMN: ColumnDef<ApiValidatorFragment> = {
   header: "Validator",
@@ -85,7 +86,8 @@ const APY_COLUMN: ColumnDef<ApiValidatorFragment> = {
 const MOST_WEIGHTED_GAUGE_COLUMN: ColumnDef<ApiValidatorFragment> = {
   header: "Most Weighted Vault",
   cell: ({ row }) => {
-    const cuttingBoards = row.original.rewardAllocationWeights ?? [];
+    const cuttingBoards = [...(row.original.rewardAllocationWeights ?? [])];
+
     const mostWeightedCuttingBoard = cuttingBoards.sort(
       (a, b) => Number(a.percentageNumerator) - Number(b.percentageNumerator),
     )[0];
@@ -95,14 +97,14 @@ const MOST_WEIGHTED_GAUGE_COLUMN: ColumnDef<ApiValidatorFragment> = {
   enableSorting: false,
 };
 
-const BRIBES_COLUMN: ColumnDef<ApiValidatorFragment> = {
+const BRIBES_COLUMN: ColumnDef<ValidatorWithUserBoost> = {
   header: "Incentives",
   cell: ({ row }) => {
     return (
       <BribesPopover
-        incentives={row.original.rewardAllocationWeights.map(
-          (rv) => rv.receivingVault?.activeIncentives ?? [],
-        )}
+        incentives={row.original.rewardAllocationWeights
+          .filter((x) => x?.receivingVault)
+          .flatMap((rv) => rv.receivingVault!.activeIncentives!)}
       />
     );
   },
@@ -110,7 +112,7 @@ const BRIBES_COLUMN: ColumnDef<ApiValidatorFragment> = {
   enableSorting: false,
 };
 
-const CLAIMABLE_BRIBES_COLUMN: ColumnDef<ApiValidatorFragment> = {
+const CLAIMABLE_BRIBES_COLUMN: ColumnDef<ValidatorWithUserBoost> = {
   header: ({ column }) => (
     <DataTableColumnHeader column={column} title="Incentives" />
   ),
@@ -119,9 +121,9 @@ const CLAIMABLE_BRIBES_COLUMN: ColumnDef<ApiValidatorFragment> = {
     return (
       <div className="flex flex-row items-center gap-1">
         <BribesPopover
-          incentives={row.original.rewardAllocationWeights?.map(
-            (rv) => rv.receivingVault?.activeIncentives,
-          )}
+          incentives={row.original.rewardAllocationWeights
+            ?.filter((rv) => rv.receivingVault)
+            .flatMap((rv) => rv.receivingVault!.activeIncentives!)}
         />
         <Tooltip
           text={"Claiming coming soon"}
@@ -138,7 +140,7 @@ const CLAIMABLE_BRIBES_COLUMN: ColumnDef<ApiValidatorFragment> = {
   enableSorting: false,
 };
 
-const USER_STAKED_COLUMN: ColumnDef<ApiValidatorFragment> = {
+const USER_STAKED_COLUMN: ColumnDef<ValidatorWithUserBoost> = {
   header: ({ column }) => (
     <DataTableColumnHeader
       column={column}
@@ -150,19 +152,19 @@ const USER_STAKED_COLUMN: ColumnDef<ApiValidatorFragment> = {
     return (
       <FormattedNumber
         showIsSmallerThanMin
-        value={row.original.dynamicData?.usersStaked ?? 0}
+        value={row.original.userBoosts.activeBoosts ?? 0}
         symbol="BGT"
       />
     );
   },
-  accessorKey: "dynamicData.usersStaked",
+  accessorKey: "userBoosts.activeBoosts",
   sortingFn: (a, b) =>
-    Number(a.original.dynamicData?.usersStaked) -
-    Number(b.original.dynamicData?.usersStaked),
+    Number(a.original.userBoosts.activeBoosts) -
+    Number(b.original.userBoosts.activeBoosts),
   enableSorting: false,
 };
 
-const USER_QUEUED_COLUMN: ColumnDef<ApiValidatorFragment> = {
+const USER_QUEUED_COLUMN: ColumnDef<ValidatorWithUserBoost> = {
   header: ({ column }) => (
     <DataTableColumnHeader
       column={column}
@@ -173,15 +175,15 @@ const USER_QUEUED_COLUMN: ColumnDef<ApiValidatorFragment> = {
   cell: ({ row }) => {
     return (
       <FormattedNumber
-        value={row.original.dynamicData?.amountQueued ?? 0}
+        value={row.original.userBoosts?.queuedBoosts ?? 0}
         symbol="BGT"
       />
     );
   },
-  accessorKey: "dynamicData.amountQueued",
+  accessorKey: "userBoosts.queuedBoosts",
   sortingFn: (a, b) =>
-    Number(a.original.dynamicData?.amountQueued) -
-    Number(b.original.dynamicData?.amountQueued),
+    Number(a.original.userBoosts?.queuedBoosts) -
+    Number(b.original.userBoosts?.queuedBoosts),
   enableSorting: false,
 };
 
@@ -307,22 +309,22 @@ export const generalValidatorColumns: ColumnDef<ApiValidatorFragment>[] = [
   GLOBAL_VOTING_POWER_COLUMN,
   APY_COLUMN,
   MOST_WEIGHTED_GAUGE_COLUMN,
-  BRIBES_COLUMN,
+  BRIBES_COLUMN as ColumnDef<ApiValidatorFragment>,
 ];
 
-export const user_general_validator_columns: ColumnDef<ApiValidatorFragment>[] =
+export const user_general_validator_columns: ColumnDef<ValidatorWithUserBoost>[] =
   [
-    VALIDATOR_COLUMN,
+    VALIDATOR_COLUMN as ColumnDef<ValidatorWithUserBoost>,
     USER_STAKED_COLUMN,
     USER_QUEUED_COLUMN,
-    GLOBAL_VOTING_POWER_COLUMN,
-    { ...APY_COLUMN, enableSorting: true },
+    GLOBAL_VOTING_POWER_COLUMN as ColumnDef<ValidatorWithUserBoost>,
+    { ...APY_COLUMN, enableSorting: true } as ColumnDef<ValidatorWithUserBoost>,
     BRIBES_COLUMN,
   ];
 
-export const user_incentives_columns: ColumnDef<ApiValidatorFragment>[] = [
-  VALIDATOR_COLUMN,
+export const user_incentives_columns: ColumnDef<ValidatorWithUserBoost>[] = [
+  VALIDATOR_COLUMN as ColumnDef<ValidatorWithUserBoost>,
   USER_STAKED_COLUMN,
-  APY_COLUMN,
+  APY_COLUMN as ColumnDef<ValidatorWithUserBoost>,
   CLAIMABLE_BRIBES_COLUMN,
 ];
