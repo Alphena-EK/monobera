@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useState } from "react";
 import {
-  usePollValidatorInfo,
+  useAllValidators,
   useUserActiveValidators,
   type UserValidator,
 } from "@bera/berajs";
@@ -37,11 +37,10 @@ export const AllValidator = ({
   ]);
 
   const {
-    validatorInfoList,
+    data: validatorData,
     isLoading,
     isValidating,
-    validatorCounts = 0,
-  } = usePollValidatorInfo({
+  } = useAllValidators({
     sortBy: sorting[0]?.id as "commission" | "apy" | "votingpower" | undefined,
     sortOrder: sorting[0]?.desc ? "desc" : "asc",
     page: page + 1,
@@ -55,9 +54,7 @@ export const AllValidator = ({
     isValidating: isUserValidating,
   } = useUserActiveValidators();
 
-  const validators = useMemo(() => {
-    return validatorInfoList as UserValidator[];
-  }, [data, validatorInfoList]);
+  const validators = validatorData?.validators ?? [];
 
   const fetchData = useCallback(
     (state: TableState) => {
@@ -65,15 +62,6 @@ export const AllValidator = ({
       setSorting(state?.sorting);
     },
     [setPage],
-  );
-
-  const handleSortingChange = useCallback(
-    (updater: Updater<SortingState>) => {
-      setSorting((prev: SortingState) => {
-        return typeof updater === "function" ? updater(prev ?? []) : updater;
-      });
-    },
-    [setSorting],
   );
 
   const handlePaginationChange = useCallback(
@@ -94,7 +82,7 @@ export const AllValidator = ({
 
   const allValidatorTable = useAsyncTable({
     fetchData: fetchData,
-    columns: generalValidatorColumns as ColumnDef<UserValidator>[],
+    columns: generalValidatorColumns,
     data: validators ?? [],
     enablePagination: true,
     additionalTableProps: {
@@ -103,19 +91,15 @@ export const AllValidator = ({
         loadingText: "Loading...",
         validating: isValidating || isUserValidating,
       },
-      state: {
+      initialState: {
         pagination: {
           pageIndex: page,
           pageSize: VALIDATOR_PAGE_SIZE,
         },
-        sorting,
       },
-      manualSorting: true,
-      manualPagination: true,
       autoResetPageIndex: false,
-      pageCount: Math.ceil(validatorCounts / VALIDATOR_PAGE_SIZE),
+      pageCount: Math.ceil(validators.length / VALIDATOR_PAGE_SIZE),
       onPaginationChange: handlePaginationChange,
-      onSortingChange: handleSortingChange,
     },
   });
 

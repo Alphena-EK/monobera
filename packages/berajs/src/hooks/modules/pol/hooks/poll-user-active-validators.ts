@@ -1,4 +1,3 @@
-import { type Validator } from "@bera/graphql/pol/subgraph";
 import useSWR from "swr";
 
 import { getUserActiveValidators } from "~/actions/pol/get-user-active-validators";

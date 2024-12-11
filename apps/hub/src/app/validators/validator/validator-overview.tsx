@@ -1,10 +1,9 @@
 import {
-  usePollAllValidators,
+  useAllValidators,
   usePollValidatorAllBlockStats,
   usePollValidatorBlockStats,
   useTokenHoneyPrices,
   type Token,
-  type Validator,
 } from "@bera/berajs";
 import { FormattedNumber, Tooltip } from "@bera/shared-ui";
 import { cn } from "@bera/ui";
@@ -16,7 +15,7 @@ import { useBlockNumber } from "wagmi";
 import { type ActiveIncentiveWithVault } from "~/types/validators";
 // import Uptime from "../components/charts/validator-uptime";
 import { UserDelegation } from "./user-delegation";
-import { getActiveIncentivesArray } from "./validator-pol-data";
+import { ApiValidatorFragment } from "@bera/graphql/pol/api";
 
 export const ValidatorDataCard = ({
   title,
@@ -40,20 +39,25 @@ export const ValidatorDataCard = ({
   );
 };
 
-export const ValidatorOverview = ({ validator }: { validator: Validator }) => {
-  const activeIncentivesArray: ActiveIncentiveWithVault[] =
-    getActiveIncentivesArray(validator);
+export const ValidatorOverview = ({
+  validator,
+}: { validator: ApiValidatorFragment }) => {
+  const activeIncentivesArray = validator.rewardAllocationWeights.map(
+    (rv) => rv.receivingVault?.activeIncentives,
+  );
 
   const { data: totalBlocks = 0 } = useBlockNumber();
   const { data, isLoading } = usePollValidatorBlockStats(validator.id);
   const blocksSigned =
     data?.blockStatsByValidators?.[0]?.allTimeBlockCount ?? 0;
+
   const {
     data: allValidatorBlockData,
     isLoading: isLoadingAllValidatorBlockData,
   } = usePollValidatorAllBlockStats();
+
   const { data: allValidators, isLoading: isLoadingValidators } =
-    usePollAllValidators();
+    useAllValidators();
 
   const totalValidators = allValidators?.validators?.length ?? 0;
   let valStakedRanking = -1;
@@ -66,6 +70,7 @@ export const ValidatorOverview = ({ validator }: { validator: Validator }) => {
   });
 
   let valSignedRanking = -1;
+
   allValidatorBlockData?.blockStatsByValidators?.find((v, index: number) => {
     if (v.validator.id.toLowerCase() === validator.id.toLowerCase()) {
       valSignedRanking = index + 1;
@@ -192,7 +197,7 @@ export const ValidatorOverview = ({ validator }: { validator: Validator }) => {
         {/* TODO: Uptime need work on beaconkit to add */}
         {/* <Uptime address={validator.id} /> */}
       </div>
-      <UserDelegation validator={validator.coinbase} />
+      <UserDelegation validator={validator.id} />
     </div>
   );
 };

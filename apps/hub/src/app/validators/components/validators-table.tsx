@@ -8,16 +8,17 @@ import { blockExplorerUrl } from "@bera/config";
 import { GaugeIcon, SearchInput } from "@bera/shared-ui";
 import { getHubValidatorPath } from "@bera/shared-ui";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@bera/ui/tabs";
-import { getAddress } from "viem";
+import { Address, getAddress } from "viem";
 
 import { AllValidator } from "./all-validator";
 import { BoostQueue } from "./boost-queue";
 import { MyValidator } from "./my-validators";
+import { ApiRewardAllocationWeightFragment } from "@bera/graphql/pol/api";
 
 export const CuttingBoardDisplay = ({
   cuttingBoard,
 }: {
-  cuttingBoard: CuttingBoardWeight | undefined;
+  cuttingBoard: ApiRewardAllocationWeightFragment | undefined;
 }) => {
   if (!cuttingBoard) return <div>No Reward Vaults Found</div>;
   return (
@@ -28,11 +29,11 @@ export const CuttingBoardDisplay = ({
       onClick={(e) => e.stopPropagation()}
     >
       <GaugeIcon
-        address={cuttingBoard.receiverMetadata?.vaultAddress ?? "0x"}
-        overrideImage={cuttingBoard.receiverMetadata?.logoURI ?? ""}
+        address={(cuttingBoard.receivingVault?.vaultAddress as Address) ?? "0x"}
+        overrideImage={cuttingBoard.receivingVault?.metadata?.logoURI ?? ""}
       />
       <span className="max-w-[200px] truncate hover:underline">
-        {cuttingBoard.receiverMetadata?.name ??
+        {cuttingBoard.receivingVault?.metadata?.name ??
           truncateHash(cuttingBoard.receiver)}
       </span>
     </Link>
@@ -128,10 +129,10 @@ export default function ValidatorsTable() {
             page={allValidatorPage}
             setPage={setAllValidatorPage}
             onRowClick={(row: any) =>
-              router.push(getHubValidatorPath(row.original.coinbase))
+              router.push(getHubValidatorPath(row.original.pubkey))
             }
             onRowHover={(row: any) =>
-              router.prefetch(getHubValidatorPath(row.original.coinbase))
+              router.prefetch(getHubValidatorPath(row.original.pubkey))
             }
           />
         </TabsContent>

@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo } from "react";
-import { usePollValidatorInfo } from "@bera/berajs";
 import { cn } from "@bera/ui";
 import { Avatar, AvatarFallback, AvatarImage } from "@bera/ui/avatar";
 import { Icons } from "@bera/ui/icons";

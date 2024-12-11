@@ -8,6 +8,7 @@ import {
 } from "@bera/shared-ui";
 import { Button } from "@bera/ui/button";
 import { type Address } from "viem";
+import { ApiVaultIncentiveFragment } from "@bera/graphql/pol/api";
 
 interface TotalValues {
   totalIncentives: number;
@@ -50,7 +51,7 @@ export const BribeTooltipRow = ({
 export const BribesTooltip = ({
   activeIncentive,
 }: {
-  activeIncentive: RewardVaultIncentive[];
+  activeIncentive: ApiVaultIncentiveFragment[];
 }) => {
   const { data: tokenHoneyPrices } = useTokenHoneyPrices({
     tokenAddresses: activeIncentive.map(
@@ -195,7 +196,7 @@ export const ClaimBribesPopover = ({
 export const BribesPopover = ({
   incentives,
 }: {
-  incentives: RewardVaultIncentive[];
+  incentives: ApiVaultIncentiveFragment[] | undefined;
 }) => {
   return (
     <>
@@ -211,7 +212,7 @@ export const BribesPopover = ({
                 tokenList={
                   incentives?.map((incentive) => ({
                     ...incentive.token,
-                    id: incentive.id,
+                    id: incentive.tokenAddress,
                   })) ?? []
                 }
                 showCount={3}

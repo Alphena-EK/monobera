@@ -6,8 +6,9 @@ import { type ColumnDef } from "@tanstack/react-table";
 
 import { BribesPopover } from "~/components/bribes-tooltip";
 import { GaugeHeaderWidget } from "~/components/gauge-header-widget";
+import { ApiValidatorFragment } from "@bera/graphql/pol/api";
 
-export const getValidatorGaugeColumns = (validator: Validator) => {
+export const getValidatorGaugeColumns = (validator: ApiValidatorFragment) => {
   const validatorGaugeColumns: ColumnDef<Gauge>[] = [
     {
       header: ({ column }) => (
@@ -34,12 +35,12 @@ export const getValidatorGaugeColumns = (validator: Validator) => {
         />
       ),
       cell: ({ row }) => {
-        const cuttingBoard = validator.cuttingBoard.weights.find(
+        const rewardVault = validator.rewardAllocationWeights.find(
           (cb) =>
             cb.receiver.toLowerCase() ===
             row.original.vaultAddress.toLowerCase(),
         );
-        if (!cuttingBoard)
+        if (!rewardVault)
           return (
             <FormattedNumber
               className="w-full justify-start"
@@ -49,9 +50,9 @@ export const getValidatorGaugeColumns = (validator: Validator) => {
               value={0}
             />
           );
-        const weight =
-          parseFloat(cuttingBoard?.percentageNumerator) / 10000 ?? 0;
-        const perProposal = weight * parseFloat(validator.rewardRate);
+        const weight = rewardVault?.percentageNumerator / 1e5 ?? 0;
+        // TODO: get the validator's reward rate
+        const perProposal = weight * 0;
 
         return (
           <FormattedNumber

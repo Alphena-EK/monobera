@@ -1,14 +1,13 @@
 import { useMemo } from "react";
-import {
-  useBlockTime,
-  usePollValidatorInfo,
-  type Validator,
-} from "@bera/berajs";
+import { useBlockTime, useAllValidators, type Validator } from "@bera/berajs";
 
 export const useValidatorEstimatedBgtPerYear = (
   validator: Validator,
 ): number => {
-  const { validatorCounts } = usePollValidatorInfo();
+  const { data } = useAllValidators();
+
+  const validatorCounts = data?.validators.length ?? 0;
+
   const blockTime = useBlockTime();
   return useMemo(() => {
     if (!validatorCounts || !validator) return 0;

@@ -1,8 +1,9 @@
 fragment ApiVaultIncentive on GqlRewardVaultIncentive {
   active
-  amountLeft
+  amountRemaining
   incentiveRate
 
+  tokenAddress
   token {
     address
     name
@@ -68,6 +69,14 @@ fragment ApiValidator on GqlValidator {
     name
     logoURI
   }
+  dynamicData {
+    amountStaked
+    usersStaked
+    amountQueued
+    usersQueued
+    apy
+    bgtCapturePercentage
+  }
   rewardAllocationWeights {
     ...ApiRewardAllocationWeight
   }
@@ -84,7 +93,11 @@ fragment ApiRewardAllocationWeight on GqlValidatorRewardAllocationWeight {
 }
 
 query GetValidators($where: GqlValidatorFilter) {
-  polGetValidators(where: $where) {
+  validators: polGetValidators(
+    where: $where
+    orderBy: amountStaked
+    orderDirection: desc
+  ) {
     ...ApiValidator
   }
 }

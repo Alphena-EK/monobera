@@ -10,45 +10,19 @@ import GlobalGaugeWeightChart from "~/components/global-gauge-weight-chart";
 import { validator_gauge_columns } from "~/columns/gauge-incentives-columns";
 import { getValidatorGaugeColumns } from "~/columns/validator-gauge-columns";
 import { type ActiveIncentiveWithVault } from "~/types/validators";
+import { ApiValidatorFragment } from "@bera/graphql/pol/api";
 
-export const getActiveIncentivesArray = (
-  validator: Validator | undefined,
-): ActiveIncentiveWithVault[] => {
-  if (!validator) return [];
-
-  return validator?.activeIncentives?.map((incentive: RewardVaultIncentive) => {
-    const vaultId = incentive.id.slice(0, 42);
-    const cuttingBoard = validator?.cuttingBoard.weights.find(
-      (cb: any) => cb.receiver.toLowerCase() === vaultId.toLowerCase(),
-    );
-    return {
-      cuttingBoard: cuttingBoard,
-      token: incentive.token,
-      amountRemaining: incentive.amountRemaining,
-      incentiveRate: incentive.incentiveRate,
-    };
-  }) as ActiveIncentiveWithVault[];
-};
-export const ValidatorPolData = ({ validator }: { validator: Validator }) => {
-  const {
-    data,
-    isLoading: isGaugeListLoading,
-    isValidating: isGaugeListValidating,
-  } = usePollGauges({ where: { validatorId: validator?.coinbase } });
-
-  const activeIncentivesArray: ActiveIncentiveWithVault[] =
-    getActiveIncentivesArray(validator);
-
+export const ValidatorPolData = ({
+  validator,
+}: { validator: ApiValidatorFragment }) => {
   const gaugesTable = useAsyncTable({
     fetchData: async () => {},
-    columns: getValidatorGaugeColumns(validator as Validator),
-    data: data?.gaugeList ?? [],
+    columns: getValidatorGaugeColumns(validator),
+    data: validator.rewardAllocationWeights ?? [],
     additionalTableProps: {
       manualSorting: false,
       meta: {
-        loading: isGaugeListLoading,
         loadingText: "Loading...",
-        validating: isGaugeListValidating,
       },
     },
   });
@@ -56,7 +30,7 @@ export const ValidatorPolData = ({ validator }: { validator: Validator }) => {
   const incentivesTable = useAsyncTable({
     fetchData: async () => {},
     columns: validator_gauge_columns,
-    data: activeIncentivesArray ?? [],
+    data: validator.rewardAllocationWeights ?? [],
     additionalTableProps: {
       manualSorting: false,
       meta: {
@@ -98,7 +72,7 @@ export const ValidatorPolData = ({ validator }: { validator: Validator }) => {
         </Tabs>
       </div>
       <GlobalGaugeWeightChart
-        gaugeWeights={validator?.cuttingBoard.weights}
+        gaugeWeights={validator?.rewardAllocationWeights}
         totalAmountStaked={validator?.amountStaked ?? "0"}
         globalAmountStaked={"10000000"}
         isLoading={false}
