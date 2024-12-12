@@ -37,7 +37,7 @@ export const useUserVaults = (
 > => {
   const { account } = useBeraJs();
   const publicClient = usePublicClient();
-  const QUERY_KEY = ["useUserVaults", account];
+  const QUERY_KEY = account ? ["useUserVaults", account] : null;
   const swrResponse = useSWR<
     | {
         totalBgtRewards: string;

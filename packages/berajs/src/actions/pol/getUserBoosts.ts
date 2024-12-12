@@ -1,4 +1,3 @@
-import { polEndpointUrl } from "@bera/config";
 import { bgtClient } from "@bera/graphql";
 import {
   GetUserValidatorInformation,

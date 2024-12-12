@@ -45,15 +45,14 @@ export const AllRewardVaultColumns: ColumnDef<ApiVaultFragment>[] = [
         className="pl-2 justify-start"
         compact={false}
         percent
-        value={row.original.dynamicData?.bgtCapturePercentage ?? 0 / 10000}
+        value={Number(row.original.dynamicData?.bgtCapturePercentage) / 100}
       />
     ),
     meta: {
       tooltip: "The percentage of global BGT captured by the gauge.",
       headerClassname: "flex-initial whitespace-nowrap",
     },
-    accessorKey: "dynamicData.bgtInflationCapture",
-    // TODO: fix sorting for bgtInflationCapture
+    accessorKey: "dynamicData.bgtCapturePercentage",
     enableSorting: true,
   },
   // {

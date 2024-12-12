@@ -9,7 +9,7 @@ export { useUserVaults, type UserVault } from "./useUserVaults";
 export { useSelectedValidator } from "./useSelectedValidator";
 export * from "./useRewardVault";
 export * from "./useRewardVaults";
-export { useSelectedGaugeValidators } from "./useSelectedGaugeValidators";
+export { useVaultValidators } from "./useVaultValidators";
 export { useClaimableFees } from "./useClaimableFees";
 export { useRewardVaultIncentives } from "./useRewardVaultIncentives";
 export * from "./useBgtInflation";

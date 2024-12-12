@@ -21,6 +21,12 @@ import {
 
 const VALIDATOR_PAGE_SIZE = 10;
 
+const map: Record<string, GqlValidatorOrderBy> = {
+  dynamicData_bgtCapturePercentage: GqlValidatorOrderBy.BgtCapturePercentage,
+  dynamicData_amountStaked: GqlValidatorOrderBy.AmountStaked,
+  dynamicData_amountQueued: GqlValidatorOrderBy.AmountQueued,
+};
+
 export const AllValidator = ({
   keyword,
   isTyping,
@@ -36,34 +42,29 @@ export const AllValidator = ({
   page: number;
   setPage: React.Dispatch<React.SetStateAction<number>>;
 }) => {
-  const [sorting, setSorting] = useState<SortingState>([
-    { id: "votingpower", desc: true },
-  ]);
+  const [sorting, setSorting] = useState<SortingState>();
 
   const {
     data: validatorData,
     isLoading,
     isValidating,
   } = useAllValidators({
-    sortBy: sorting[0]?.id as GqlValidatorOrderBy,
-    sortOrder: (sorting[0]?.desc
-      ? "desc"
-      : "asc") as GqlValidatorOrderDirection,
+    sortBy: map[sorting?.[0]?.id as string],
+    sortOrder: sorting?.[0]
+      ? sorting?.[0]?.desc
+        ? GqlValidatorOrderDirection.Desc
+        : GqlValidatorOrderDirection.Asc
+      : GqlValidatorOrderDirection.Desc,
     // query: isTyping ? "" : keyword,
   });
-
-  const {
-    data = [],
-    isLoading: isUserLoading,
-    isValidating: isUserValidating,
-  } = useUserActiveValidators();
 
   const validators = validatorData?.validators ?? [];
 
   const fetchData = useCallback(
     (state: TableState) => {
       setPage(state?.pagination?.pageIndex);
-      console.log("SETTING SORT", state?.sorting);
+
+      console.log(state?.sorting);
 
       setSorting(state?.sorting);
     },
@@ -86,26 +87,43 @@ export const AllValidator = ({
     [setPage],
   );
 
+  const handleSortingChange = useCallback(
+    (updater: Updater<SortingState>) => {
+      setSorting((prev) => {
+        const newPaginationState =
+          typeof updater === "function" ? updater(prev ?? []) : updater;
+        return newPaginationState.slice(0, 1);
+      });
+    },
+    [setPage],
+  );
+
   const allValidatorTable = useAsyncTable({
     fetchData: fetchData,
     columns: generalValidatorColumns,
-    data: validators ?? [],
+    data:
+      validators.slice(
+        page * VALIDATOR_PAGE_SIZE,
+        (page + 1) * VALIDATOR_PAGE_SIZE,
+      ) ?? [],
     enablePagination: true,
     additionalTableProps: {
       meta: {
-        loading: isLoading || isUserLoading,
+        loading: isLoading,
         loadingText: "Loading...",
-        validating: isValidating || isUserValidating,
+        validating: isValidating,
       },
-      initialState: {
+      state: {
         pagination: {
           pageIndex: page,
           pageSize: VALIDATOR_PAGE_SIZE,
         },
+        sorting,
       },
       autoResetPageIndex: false,
       pageCount: Math.ceil(validators.length / VALIDATOR_PAGE_SIZE),
       onPaginationChange: handlePaginationChange,
+      onSortingChange: handleSortingChange,
     },
   });
 

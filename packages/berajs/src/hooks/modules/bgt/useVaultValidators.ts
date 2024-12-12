@@ -1,6 +1,6 @@
-import { polEndpointUrl } from "@bera/config";
 import useSWR, { mutate } from "swr";
 import { Address } from "viem";
+import { getVaultValidators } from "~/actions";
 import {
   DefaultHookOptions,
   DefaultHookReturnType,
@@ -11,19 +11,17 @@ import {
 export interface UsePollValidatorInfoResponse
   extends DefaultHookReturnType<Validator[] | undefined> {}
 
-export const useSelectedGaugeValidators = (
+export const useVaultValidators = (
   id: Address,
   options?: DefaultHookOptions,
 ): UsePollValidatorInfoResponse => {
-  const QUERY_KEY = ["useSelectedGaugeValidators", id];
+  const QUERY_KEY = id ? ["useVaultValidators", id] : null;
   const swrResponse = useSWR<Validator[] | undefined, any, typeof QUERY_KEY>(
     QUERY_KEY,
     async () => {
-      if (!id) return undefined;
-      const url = `${polEndpointUrl}/validators?vaultId=${id}`;
-      const gauge = await fetch(url);
-      const temp = await gauge.json();
-      return temp.validators;
+      return await getVaultValidators({
+        address: id as Address,
+      });
     },
     {
       ...options?.opts,

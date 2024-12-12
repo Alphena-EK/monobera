@@ -13,7 +13,9 @@ export const GaugeHeaderWidget = ({
   const { data: vaultsData, isLoading } = useRewardVaults({
     pageSize: 9999,
   });
-  const gauge = vaultsData?.gaugeDictionary?.[address];
+  const gauge = vaultsData?.gaugeList?.find(
+    (gauge) => gauge.vaultAddress.toLowerCase() === address.toLowerCase(),
+  );
 
   const { data } = useTokens();
   const tokenList = data?.tokenList ?? [];

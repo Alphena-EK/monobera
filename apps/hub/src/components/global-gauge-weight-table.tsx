@@ -23,6 +23,10 @@ import {
 
 const GAUGE_PAGE_SIZE = 10;
 
+const map: Record<string, GqlRewardVaultOrderBy> = {
+  allTimeBGTReceived: GqlRewardVaultOrderBy.AllTimeBgtReceived,
+  dynamicData_bgtCapturePercentage: GqlRewardVaultOrderBy.BgtCapturePercentage,
+};
 export default function GlobalGaugeWeightTable({
   myGauge = false,
   keywords = "",
@@ -36,13 +40,13 @@ export default function GlobalGaugeWeightTable({
 }) {
   const router = useRouter();
   const [page, setPage] = useState(0);
-  const [sorting, setSorting] = useState([
+  const [sorting, setSorting] = useState<SortingState>([
     { id: GqlRewardVaultOrderBy.AllTimeBgtReceived, desc: true },
   ]);
 
   const { data, isLoading, isValidating } = useRewardVaults(
     {
-      orderBy: sorting[0]?.id as GqlRewardVaultOrderBy,
+      orderBy: map[sorting[0]?.id],
       orderDirection: (sorting[0]?.desc
         ? "desc"
         : "asc") as GqlRewardVaultOrderDirection,
@@ -60,7 +64,13 @@ export default function GlobalGaugeWeightTable({
   const fetchData = useCallback(
     (state: TableState) => {
       setPage(state?.pagination?.pageIndex);
-      setSorting(state?.sorting);
+
+      setSorting(
+        state?.sorting.map((s) => ({
+          id: s.id,
+          desc: s.desc,
+        })),
+      );
     },
     [setPage],
   );

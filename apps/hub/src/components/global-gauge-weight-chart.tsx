@@ -32,17 +32,21 @@ export default function GlobalGaugeWeightChart({
   const [othersIndex, setOthersIndex] = useState<number>(-1);
 
   const gauges: CuttingBoardWeightMega[] = useMemo(() => {
-    const gaugeW = (gaugeWeights ?? []).map((gauge, index: number) => ({
+    if (!gaugeWeights) return [];
+
+    const gaugeW = gaugeWeights.map((gauge, index: number) => ({
       ...gauge,
-      percentage: Number(gauge.percentageNumerator) / 10000,
+      percentage: Number(gauge.percentageNumerator) / 10_000,
       id: index,
     }));
 
     const othersPercentage = gaugeW.reduce((acc, gauge) => {
-      return acc + gauge.percentage < THRESHOLD ? gauge.percentage : 0;
+      return acc + (gauge.percentage < THRESHOLD ? gauge.percentage : 0);
     }, 0);
 
-    const filtered = gaugeW.filter((gauge) => gauge.percentage >= THRESHOLD);
+    const filtered = gaugeW.filter((gauge) => {
+      return gauge.percentage >= THRESHOLD;
+    });
 
     const combined = [...filtered];
 

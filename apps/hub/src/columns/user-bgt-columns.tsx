@@ -55,7 +55,7 @@ export const getUserBgtColumns = ({
           </span>
         </>
       ),
-      accessorKey: "amountDeposited",
+      accessorKey: "balance",
       enableSorting: true,
     },
     {

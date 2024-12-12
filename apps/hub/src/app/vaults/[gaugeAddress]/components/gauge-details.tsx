@@ -5,7 +5,7 @@ import {
   truncateHash,
   useVaultAddress,
   useRewardVault,
-  useSelectedGaugeValidators,
+  useVaultValidators,
   type UserValidator,
   useRewardVaultIncentives,
   useMultipleTokenInformation,
@@ -61,7 +61,7 @@ const _GaugeDetails = ({ gaugeAddress }: { gaugeAddress: Address }) => {
     data: validators = [],
     isLoading: isValidatorsLoading,
     isValidating: isValidatorsValidating,
-  } = useSelectedGaugeValidators(gaugeAddress);
+  } = useVaultValidators(gaugeAddress);
 
   const { data: incentivesData } = useRewardVaultIncentives({
     address: rewardVault?.address,

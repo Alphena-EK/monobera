@@ -1,19 +1,14 @@
-import { bgtTokenAddress } from "@bera/config";
 import useSWR from "swr";
 import { usePublicClient } from "wagmi";
 
 import { GlobalInfo, getBGTGlobalInfo } from "~/actions/bgt/getBGTGlobalInfo";
 import { getBgtTokenTotalSupply } from "~/actions/bgt/getBgtTokenTotalSupply";
 import { getGlobalCuttingBoard } from "~/actions/bgt/getGlobalCuttingBoard";
-import {
-  CuttingBoardWeight,
-  DefaultHookOptions,
-  DefaultHookReturnType,
-  useBeraJs,
-} from "../../..";
+import { DefaultHookOptions, DefaultHookReturnType, useBeraJs } from "../../..";
+import { ApiRewardAllocationWeightFragment } from "@bera/graphql/pol/api";
 
 interface GlobalData extends GlobalInfo {
-  globalCuttingBoard: CuttingBoardWeight[];
+  globalCuttingBoard: ApiRewardAllocationWeightFragment[];
   bgtTotalSupply: string | undefined;
 }
 export interface IUsePollGlobalDataResponse
@@ -39,7 +34,7 @@ export const usePollGlobalData = (
         ]);
       return {
         bgtTotalSupply,
-        globalCuttingBoard: globalCuttingBoard,
+        globalCuttingBoard,
         ...globalData,
       } as any;
     },

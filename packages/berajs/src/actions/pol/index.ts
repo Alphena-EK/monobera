@@ -1,5 +1,5 @@
 export * from "./get-gauges-data";
-export * from "./get-valid-validator";
+export * from "./getVaultValidators";
 export * from "./get-user-active-validators";
 export * from "./get-validator-all-block-stats";
 export * from "./get-validator-bgt-boost";

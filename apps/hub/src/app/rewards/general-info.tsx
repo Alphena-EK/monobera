@@ -23,8 +23,6 @@ import { Skeleton } from "@bera/ui/skeleton";
 import { useClaimableFees } from "~/hooks/useClaimableFees";
 import { useClaimableIncetives } from "~/hooks/useClaimableIncentives";
 
-// import { useClaimAllBgtCalldata } from "~/hooks/useClaimAllBgtCalldata";
-
 export const GeneralInfo = () => {
   const { data: userVaultInfo, isLoading: isTotalBgtRewardsLoading } =
     useUserVaults();
@@ -40,10 +38,6 @@ export const GeneralInfo = () => {
     isLoading: isClaimableFeesLoading,
     refresh,
   } = useClaimableFees();
-  // const isDataReady =
-  //   !isTotalBgtRewardsLoading &&
-  //   !isClaimableIncentivesLoading &&
-  //   !isClaimableFeesLoading
 
   const [isDataReady, setIsDataReady] = useState(false);
 

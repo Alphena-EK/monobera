@@ -77,7 +77,7 @@ export const getValidatorGaugeColumns = () => {
             value={row.original.receivingVault?.activeIncentivesValueUsd ?? 0}
           />
         ),
-        accessorKey: "incentive-value",
+        accessorKey: "receivingVault.activeIncentivesValueUsd",
         enableSorting: false,
       },
       {

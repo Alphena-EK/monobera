@@ -98,14 +98,24 @@ fragment ApiRewardAllocationWeight on GqlValidatorRewardAllocationWeight {
 
 query GetValidators(
   $where: GqlValidatorFilter
-  $sortBy: GqlValidatorOrderBy = amountStaked
+  $sortBy: GqlValidatorOrderBy = bgtCapturePercentage
   $sortOrder: GqlValidatorOrderDirection = desc
+  $pageSize: Int
+  $skip: Int
 ) {
   validators: polGetValidators(
     where: $where
     orderBy: $sortBy
     orderDirection: $sortOrder
+    first: $pageSize
+    skip: $skip
   ) {
+    ...ApiValidator
+  }
+}
+
+query GetVaultValidators($vaultId: String!) {
+  validators: polGetValidators(where: { vaultAddress: $vaultId }) {
     ...ApiValidator
   }
 }
