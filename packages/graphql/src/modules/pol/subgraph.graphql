@@ -8,6 +8,8 @@ query GetUserValidatorInformation($address: Bytes!) {
     id
     amountQueued
     amountDeposited
+    amountDropQueued
+
     latestBlock
     user
     latestBlockTime
@@ -221,7 +223,7 @@ query GetRewardVault($stakingToken: String) {
 }
 
 query GetValidatorByOperator($operator: Bytes = "") {
-  validators(where: {operator: $operator}) {
+  validators(where: { operator: $operator }) {
     publicKey
   }
 }

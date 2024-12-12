@@ -92,9 +92,9 @@ export const ValidatorOverview = ({
   );
 
   const { data: tokenHoneyPrices } = useTokenHoneyPrices({
-    tokenAddresses: activeIncentivesTokens.map(
-      (t) => t?.token?.address,
-    ) as Address[],
+    tokenAddresses: activeIncentivesTokens
+      ?.map((t) => t?.token?.address)
+      .filter((t) => t !== undefined) as Address[] | undefined,
   });
 
   const returnPerBgt: number = activeIncentivesArray?.reduce(

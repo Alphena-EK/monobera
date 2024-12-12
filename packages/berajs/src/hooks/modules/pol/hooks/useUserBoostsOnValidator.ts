@@ -9,7 +9,7 @@ export const useUserBoostsOnValidator = ({
   pubkey,
   ...args
 }: {
-  pubkey: Address;
+  pubkey: Address | undefined;
   account?: Address;
 }): DefaultHookReturnType<UserBoostsOnValidator> => {
   const { account: connectedAccount, config: beraConfig } = useBeraJs();
@@ -22,12 +22,19 @@ export const useUserBoostsOnValidator = ({
 
   const swrResponse = useSWR(QUERY_KEY, async () => {
     if (!account) {
-      throw new Error("useUserBoostsOnValidator needs a logged in account");
+      throw new Error(
+        "useUserBoostsOnValidator needs at least a logged in account",
+      );
     }
+
+    if (!pubkey) {
+      throw new Error("useUserBoostsOnValidator needs a pubkey");
+    }
+
     return await getUserBoostsOnValidator({
       config: beraConfig,
       account,
-      pubkey,
+      pubkey: pubkey!,
       publicClient,
     });
   });

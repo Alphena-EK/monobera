@@ -8,6 +8,7 @@ import {
   useUserActiveValidators,
   useBeraJs,
   useAllValidators,
+  useUserBoostsOnValidator,
 } from "@bera/berajs";
 import { bgtTokenAddress } from "@bera/config";
 import {
@@ -25,6 +26,11 @@ import { ValidatorWithUserBoost } from "@bera/berajs/actions";
 
 export const HISTORY_BUFFER = 8192;
 
+type QueueItem = ValidatorWithUserBoost & {
+  canActivate: boolean;
+  type: "boost" | "dropBoost";
+};
+
 export const BoostQueue = ({
   selectedValidator,
   isValidatorDataLoading,
@@ -37,37 +43,61 @@ export const BoostQueue = ({
   const { data = [], refresh } = useUserActiveValidators();
   const { refresh: refreshBalance } = useBgtUnstakedBalance();
 
+  const { data: userBoosts, refresh: refreshUserBoosts } =
+    useUserBoostsOnValidator({
+      pubkey: selectedValidator as Address | undefined,
+    });
+
   const { data: blockNumber } = useBlockNumber();
 
   const queuedList = useMemo(() => {
     return !data || !blockNumber || !data.length
       ? []
-      : data
-          .filter((validator) => {
-            return parseFloat(validator.userBoosts.queuedBoosts) !== 0;
-          })
-          .map((validator) => {
-            return {
+      : data.flatMap((validator) => {
+          if (selectedValidator) {
+            if (
+              validator.pubkey.toLowerCase() !== selectedValidator.toLowerCase()
+            ) {
+              return [];
+            }
+            if (userBoosts) {
+              validator.userBoosts = userBoosts;
+            }
+          }
+
+          const items: QueueItem[] = [];
+
+          if (Number(validator.userBoosts.queuedBoosts) > 0) {
+            items.push({
               ...validator,
               canActivate:
                 validator.userBoosts?.queueBoostStartBlock +
                   HISTORY_BUFFER -
                   Number(blockNumber) <=
                 0,
-            };
-          })
-          .filter((validator) => {
-            return selectedValidator !== undefined
-              ? validator.id.toLowerCase() === selectedValidator.toLowerCase()
-              : true;
-          });
-  }, [data, blockNumber]);
+              type: "boost",
+            });
+          }
+
+          if (Number(validator.userBoosts.queuedUnboosts) > 0) {
+            items.push({
+              ...validator,
+              canActivate:
+                validator.userBoosts?.queueUnboostStartBlock +
+                  HISTORY_BUFFER -
+                  Number(blockNumber) <=
+                0,
+              type: "dropBoost",
+            });
+          }
+
+          return items;
+        });
+  }, [data, blockNumber, userBoosts]);
 
   const [hasSubmittedTxn, setHasSubmittedTxn] = useState<
     Record<number, boolean>
   >({} as any);
-
-  console.log({ hasSubmittedTxn });
 
   const {
     write: activateWrite,
@@ -81,9 +111,26 @@ export const BoostQueue = ({
       setTimeout(() => {
         refresh();
         refreshBalance();
+        refreshUserBoosts();
         setHasSubmittedTxn({} as any);
         setIsValidatorDataLoading(false);
       }, 5000);
+    },
+  });
+
+  const {
+    write: dropBoostWrite,
+    isLoading: isDropBoostLoading,
+    ModalPortal: DropBoostModalPortal,
+  } = useTxn({
+    message: "Dropping queued boost to Validator",
+    actionType: TransactionActionType.DELEGATE,
+    onSuccess: () => {
+      refresh();
+      refreshBalance();
+      refreshUserBoosts();
+      setHasSubmittedTxn({} as any);
+      setIsValidatorDataLoading(false);
     },
   });
 
@@ -99,6 +146,26 @@ export const BoostQueue = ({
       setTimeout(() => {
         refresh();
         refreshBalance();
+        refreshUserBoosts();
+        setHasSubmittedTxn({} as any);
+        setIsValidatorDataLoading(false);
+      }, 5000);
+    },
+  });
+
+  const {
+    write: cancelDropBoostWrite,
+    isLoading: isCancelDropBoostLoading,
+    ModalPortal: CancelDropBoostModalPortal,
+  } = useTxn({
+    message: "Cancelling queued drop boost to Validator",
+    actionType: TransactionActionType.DELEGATE,
+    onSuccess: () => {
+      setIsValidatorDataLoading(true);
+      setTimeout(() => {
+        refresh();
+        refreshBalance();
+        refreshUserBoosts();
         setHasSubmittedTxn({} as any);
         setIsValidatorDataLoading(false);
       }, 5000);
@@ -109,14 +176,22 @@ export const BoostQueue = ({
     index: number,
     isActivate: boolean,
     props: IContractWrite,
+    isDropBoost: boolean,
   ) => {
-    console.log("handleTransaction", index, isActivate);
-
     setHasSubmittedTxn({ ...hasSubmittedTxn, [index]: true } as any);
+
     if (isActivate) {
-      activateWrite(props);
+      if (isDropBoost) {
+        dropBoostWrite(props);
+      } else {
+        activateWrite(props);
+      }
     } else {
-      cancelWrite(props);
+      if (isDropBoost) {
+        cancelDropBoostWrite(props);
+      } else {
+        cancelWrite(props);
+      }
     }
   };
 
@@ -124,6 +199,8 @@ export const BoostQueue = ({
     <div className="flex flex-col gap-3">
       {ActivateModalPortal}
       {CancelModalPortal}
+      {CancelDropBoostModalPortal}
+      {DropBoostModalPortal}
       <div className="flex items-center">
         <div className="mr-2 text-lg font-semibold leading-7">Queued</div>
         {isValidatorDataLoading && <Spinner size={18} color="white" />}
@@ -142,11 +219,6 @@ export const BoostQueue = ({
               userValidator={validator}
               index={index}
               hasSubmittedTxn={hasSubmittedTxn[index] ?? false}
-              blocksLeft={
-                Number(validator.userBoosts.queueBoostStartBlock) +
-                HISTORY_BUFFER -
-                Number(blockNumber)
-              }
               isTxnLoading={isActivationLoading || isCancelLoading}
               handleTransaction={handleTransaction}
             />
@@ -162,43 +234,42 @@ export const BoostQueue = ({
 
 const ConfirmationCard = ({
   userValidator,
-  blocksLeft,
   isTxnLoading,
   index,
   hasSubmittedTxn,
   handleTransaction,
 }: {
-  userValidator: ValidatorWithUserBoost;
-  blocksLeft: number;
+  userValidator: QueueItem;
   isTxnLoading: boolean;
   index: number;
   hasSubmittedTxn: boolean;
   handleTransaction: (
     index: number,
     isActivate: boolean,
-    props: IContractWrite,
+    props: IContractWrite<typeof BGT_ABI>,
+    isDropBoost: boolean,
   ) => void;
 }) => {
   const { data: block } = useBlockNumber();
 
   const { account } = useBeraJs();
 
-  const isReadyForConfirmation =
-    Number(userValidator.userBoosts.queueBoostStartBlock) +
-      HISTORY_BUFFER -
-      Number(block) <
-    0;
+  const amount =
+    userValidator.type === "boost"
+      ? userValidator.userBoosts.queuedBoosts
+      : userValidator.userBoosts.queuedUnboosts;
+  const startBlock =
+    userValidator.type === "boost"
+      ? userValidator.userBoosts.queueBoostStartBlock
+      : userValidator.userBoosts.queueUnboostStartBlock;
+
+  const blocksLeft = Number(startBlock) + HISTORY_BUFFER - Number(block);
+
+  const isReadyForConfirmation = blocksLeft <= 0;
+
   const width = isReadyForConfirmation
     ? 100
     : Math.round(Math.abs(1 - blocksLeft / HISTORY_BUFFER) * 100);
-
-  console.log({
-    block,
-    userValidator,
-    blocksLeft,
-    isTxnLoading,
-    hasSubmittedTxn,
-  });
 
   const timeText = (
     <span className="text-info-foreground">{blocksLeft} blocks remaining</span>
@@ -206,9 +277,9 @@ const ConfirmationCard = ({
 
   const { data } = useAllValidators();
 
-  const coinbase = userValidator.pubkey;
+  const pubkey = userValidator.pubkey;
   const validatorInfo = data?.validators.find(
-    (v) => v.pubkey.toLowerCase() === coinbase.toLowerCase(),
+    (v) => v.pubkey.toLowerCase() === pubkey.toLowerCase(),
   );
 
   return (
@@ -219,7 +290,6 @@ const ConfirmationCard = ({
             <ValidatorIcon
               address={userValidator.pubkey as Address}
               className="h-8 w-8"
-              // imgOverride={userValidator.metadata?.logoURI}
             />
             <div>
               {validatorInfo?.metadata?.name ??
@@ -229,7 +299,7 @@ const ConfirmationCard = ({
           <div className="ml-8 text-muted-foreground ">
             <FormattedNumber
               showIsSmallerThanMin
-              value={userValidator.userBoosts.queuedBoosts}
+              value={userValidator.type === "boost" ? amount : -Number(amount)}
               compact
             />{" "}
             BGT
@@ -242,12 +312,20 @@ const ConfirmationCard = ({
               isTxnLoading || !isReadyForConfirmation || hasSubmittedTxn
             }
             onClick={() =>
-              handleTransaction(index, true, {
-                address: bgtTokenAddress,
-                abi: BGT_ABI,
-                functionName: "activateBoost",
-                params: [account!, userValidator.pubkey],
-              })
+              handleTransaction(
+                index,
+                true,
+                {
+                  address: bgtTokenAddress,
+                  abi: BGT_ABI,
+                  functionName:
+                    userValidator.type === "boost"
+                      ? "activateBoost"
+                      : "dropBoost",
+                  params: [account!, userValidator.pubkey as Address],
+                },
+                userValidator.type === "dropBoost",
+              )
             }
           >
             Confirm
@@ -256,15 +334,23 @@ const ConfirmationCard = ({
             variant="ghost"
             disabled={isTxnLoading || hasSubmittedTxn}
             onClick={() =>
-              handleTransaction(index, false, {
-                address: bgtTokenAddress,
-                abi: BGT_ABI,
-                functionName: "cancelBoost",
-                params: [
-                  userValidator.pubkey,
-                  parseUnits(userValidator.userBoosts.queuedBoosts, 18),
-                ],
-              })
+              handleTransaction(
+                index,
+                false,
+                {
+                  address: bgtTokenAddress,
+                  abi: BGT_ABI,
+                  functionName:
+                    userValidator.type === "boost"
+                      ? "cancelBoost"
+                      : "cancelDropBoost",
+                  params: [
+                    userValidator.pubkey as Address,
+                    parseUnits(amount, 18),
+                  ],
+                },
+                userValidator.type === "dropBoost",
+              )
             }
           >
             Cancel
