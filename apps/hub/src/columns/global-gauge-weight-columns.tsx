@@ -14,6 +14,7 @@ export const AllRewardVaultColumns: ColumnDef<ApiVaultFragment>[] = [
     cell: ({ row }) => (
       <GaugeHeaderWidget
         address={row.original.vaultAddress as Address}
+        gauge={row.original}
         // className="w-[150px]"
       />
     ),

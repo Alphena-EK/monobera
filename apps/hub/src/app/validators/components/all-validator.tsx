@@ -55,7 +55,7 @@ export const AllValidator = ({
         ? GqlValidatorOrderDirection.Desc
         : GqlValidatorOrderDirection.Asc
       : GqlValidatorOrderDirection.Desc,
-    // query: isTyping ? "" : keyword,
+    search: isTyping ? "" : keyword,
   });
 
   const validators = validatorData?.validators ?? [];

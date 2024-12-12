@@ -53,7 +53,7 @@ export default function GlobalGaugeWeightTable({
       skip: GAUGE_PAGE_SIZE * page,
       // filterByProduct: markets,
       pageSize: GAUGE_PAGE_SIZE,
-      // query: isTyping ? "" : keywords,
+      search: isTyping ? "" : keywords,
     },
     { opts: { keepPreviousData: true } },
   );

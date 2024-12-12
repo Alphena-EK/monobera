@@ -1,4 +1,5 @@
 import { truncateHash, useRewardVaults, useTokens } from "@bera/berajs";
+import { ApiVaultFragment } from "@bera/graphql/pol/api";
 import { GaugeIcon, MarketIcon, TokenIconList } from "@bera/shared-ui";
 import { cn } from "@bera/ui";
 import { Address } from "viem";
@@ -6,16 +7,21 @@ import { Address } from "viem";
 export const GaugeHeaderWidget = ({
   address,
   className,
+  gauge: defaultGauge,
 }: {
   address: Address;
   className?: string;
+  gauge?: ApiVaultFragment;
 }) => {
   const { data: vaultsData, isLoading } = useRewardVaults({
     pageSize: 9999,
   });
-  const gauge = vaultsData?.gaugeList?.find(
-    (gauge) => gauge.vaultAddress.toLowerCase() === address.toLowerCase(),
-  );
+
+  const gauge =
+    defaultGauge ??
+    vaultsData?.gaugeList?.find(
+      (gauge) => gauge.vaultAddress.toLowerCase() === address.toLowerCase(),
+    );
 
   const { data } = useTokens();
   const tokenList = data?.tokenList ?? [];

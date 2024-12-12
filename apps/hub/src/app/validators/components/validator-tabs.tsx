@@ -30,7 +30,8 @@ export const ValidatorTabs = ({
   const { account } = useBeraJs();
   const { data } = useValidatorByOperator(account ?? "0x");
   const isValidatorWallet =
-    data?.validators[0]?.publicKey === validator.coinbase;
+    data?.validators[0]?.publicKey?.toLowerCase() ===
+    validator.pubkey.toLowerCase();
 
   const [dayRange, setDayRange] = useState("30");
   const [activeTab, setActiveTab] = useState<ValidatorTabValue>("overview");

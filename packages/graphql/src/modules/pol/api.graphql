@@ -50,6 +50,7 @@ query GetVaults(
   $skip: Int
   $orderBy: GqlRewardVaultOrderBy
   $orderDirection: GqlRewardVaultOrderDirection
+  $search: String
 ) {
   polGetRewardVaults(
     where: $where
@@ -57,6 +58,7 @@ query GetVaults(
     skip: $skip
     orderBy: $orderBy
     orderDirection: $orderDirection
+    search: $search
   ) {
     ...ApiVault
   }
@@ -80,6 +82,7 @@ fragment ApiValidator on GqlValidator {
     apy
     bgtCapturePercentage
     bgtEmittedAllTime
+    rewardRate
   }
   rewardAllocationWeights {
     ...ApiRewardAllocationWeight
@@ -102,6 +105,7 @@ query GetValidators(
   $sortOrder: GqlValidatorOrderDirection = desc
   $pageSize: Int
   $skip: Int
+  $search: String
 ) {
   validators: polGetValidators(
     where: $where
@@ -109,6 +113,7 @@ query GetValidators(
     orderDirection: $sortOrder
     first: $pageSize
     skip: $skip
+    search: $search
   ) {
     ...ApiValidator
   }

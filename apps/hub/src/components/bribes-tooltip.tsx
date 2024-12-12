@@ -63,9 +63,10 @@ export const BribesTooltip = ({
       );
       console.log({ ab });
       return {
-        totalIncentives: acc.totalIncentives + ab.amountRemaining * tokenPrice,
+        totalIncentives:
+          acc.totalIncentives + Number(ab.amountRemaining) * tokenPrice,
         amountPerProposal:
-          acc.amountPerProposal + ab.incentiveRate * tokenPrice,
+          acc.amountPerProposal + Number(ab.incentiveRate) * tokenPrice,
       };
     },
     {
@@ -83,9 +84,9 @@ export const BribesTooltip = ({
             );
             return {
               totalIncentives:
-                acc.totalIncentives + ab.amountRemaining * tokenPrice,
+                acc.totalIncentives + Number(ab.amountRemaining) * tokenPrice,
               amountPerProposal:
-                acc.amountPerProposal + ab.incentiveRate * tokenPrice,
+                acc.amountPerProposal + Number(ab.incentiveRate) * tokenPrice,
             };
           },
           {
@@ -105,13 +106,13 @@ export const BribesTooltip = ({
           tokenHoneyPrices?.[ab.token.address] ?? "0",
         );
         const bribeTotalValues: TotalValues = {
-          totalIncentives: ab.amountRemaining * tokenPrice,
-          amountPerProposal: ab.incentiveRate * tokenPrice,
-          tokenAmountPerProposal: ab.incentiveRate,
+          totalIncentives: Number(ab.amountRemaining) * tokenPrice,
+          amountPerProposal: Number(ab.incentiveRate) * tokenPrice,
+          tokenAmountPerProposal: Number(ab.incentiveRate),
         };
         return (
           <BribeTooltipRow
-            token={ab.token}
+            token={ab.token as Token}
             totalValues={bribeTotalValues}
             key={`${i}-BribeTooltipRow`}
           />

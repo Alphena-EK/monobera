@@ -221,7 +221,8 @@ export const getGaugeValidatorColumns = (gauge: RewardVault) => {
             />
           );
         const weight = cuttingBoard?.percentageNumerator / 1e5 ?? 0;
-        const perProposal = weight * parseFloat(row.original.rewardRate);
+        const perProposal =
+          weight * parseFloat(row.original.dynamicData?.rewardRate ?? "0");
         return (
           <div className="flex flex-col gap-1">
             <FormattedNumber
