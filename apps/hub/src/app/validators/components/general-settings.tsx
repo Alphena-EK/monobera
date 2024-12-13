@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from "react";
 import {
   TransactionActionType,
   beaconDepositAbi,
+  truncateHash,
   useBeraJs,
   useValidatorOperatorAddress,
   useValidatorQueuedOperatorAddress,
@@ -12,7 +13,7 @@ import { Button } from "@bera/ui/button";
 import { Card, CardContent, CardFooter } from "@bera/ui/card";
 import { Checkbox } from "@bera/ui/checkbox";
 import { Icons } from "@bera/ui/icons";
-import { Input } from "@bera/ui/input";
+import { InputWithLabel } from "@bera/ui/input";
 import { Address, isAddress, zeroAddress } from "viem";
 
 export const GeneralSettings = ({
@@ -32,7 +33,7 @@ export const GeneralSettings = ({
     isLoading: isQueuedOperatorAddressLoading,
     refresh: refreshQueuedOperatorAddress,
   } = useValidatorQueuedOperatorAddress(validatorPublicKey);
-  const [operatorInput, setOperatorInput] = useState<string>(account || "");
+  const [operatorInput, setOperatorInput] = useState<string>("");
 
   const isQueuedOperatorAddress = useMemo(() => {
     if (
@@ -107,9 +108,13 @@ export const GeneralSettings = ({
     });
   }, [validatorPublicKey]);
 
-  const isValidAddress = useMemo(() => {
-    return operatorInput ? isAddress(operatorInput) : true;
-  }, [operatorInput]);
+  const isValidAddress = useMemo(
+    () =>
+      isAddress(operatorInput) &&
+      operatorInput !== zeroAddress &&
+      operatorInput !== account,
+    [operatorInput],
+  );
 
   return (
     <div className="flex flex-col gap-6">
@@ -170,17 +175,12 @@ export const GeneralSettings = ({
             Configure your operator address
           </span>
           <span className="mt-2 flex font-semibold">Operator Address</span>
-          <Input
-            type="input"
-            className={`w-[300px] ${
-              operatorInput
-                ? isValidAddress
-                  ? "border-green-500"
-                  : "border-red-500"
-                : ""
-            }`}
+          <InputWithLabel
             value={operatorInput}
+            placeholder={truncateHash("0x00000000000000")}
             onChange={(e) => setOperatorInput(e.target.value)}
+            className="w-[300px]"
+            error={!isValidAddress ? "Please enter a valid address" : undefined}
           />
         </CardContent>
         <CardFooter className="flex w-full justify-between border-t border-border pt-6">
@@ -202,6 +202,15 @@ export const GeneralSettings = ({
           <Button
             className="flex w-[100px] self-center border border-border p-2"
             size={"sm"}
+            title={
+              !confirmed
+                ? "Please confirm the change"
+                : isApplyingOperatorChange
+                  ? "Applying Operator Change"
+                  : !isValidAddress
+                    ? "Please enter a valid address"
+                    : undefined
+            }
             disabled={!confirmed || isApplyingOperatorChange || !isValidAddress}
             onClick={handleSaveSettings}
           >
