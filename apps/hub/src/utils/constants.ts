@@ -8,6 +8,7 @@ export enum LOCAL_STORAGE_KEYS {
   DEADLINE_TYPE = "DEADLINE_TYPE",
   DEADLINE_VALUE = "DEADLINE_VALUE",
   CLAIM_REWARDS_RECIPIENT = "CLAIM_REWARDS_RECIPIENT",
+  COOKIES_OPT_OUT = "COOKIES_OPT_OUT",
 }
 
 // TODO (BFE-400): this and settings.tsx are defining similar things (mostly for the swap-settings & settings inputs)

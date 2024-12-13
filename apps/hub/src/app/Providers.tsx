@@ -6,6 +6,7 @@ import { BeraWagmi } from "@bera/wagmi";
 import posthog from "posthog-js";
 import { PostHogProvider } from "posthog-js/react";
 
+import CookiesSettingsBanner from "~/components/cookies-banner";
 import { ThemeProvider } from "~/components/theme-provider";
 
 export default function Providers({ children }: PropsWithChildren<any>) {
@@ -31,6 +32,7 @@ export default function Providers({ children }: PropsWithChildren<any>) {
               themes={["dark"]}
             >
               {children}
+              <CookiesSettingsBanner />
             </ThemeProvider>
           </BlockTimeProvider>
         </BeraJsProvider>
