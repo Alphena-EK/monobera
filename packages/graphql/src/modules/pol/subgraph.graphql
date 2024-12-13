@@ -10,9 +10,9 @@ query GetUserValidatorInformation($address: Bytes!) {
     amountDeposited
     amountDropQueued
 
-    latestBlock
+    dropQueuedStartBlock
+    queuedStartBlock
     user
-    latestBlockTime
     validator {
       ...ValidatorMinimal
     }

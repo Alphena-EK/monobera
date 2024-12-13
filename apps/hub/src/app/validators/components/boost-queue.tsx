@@ -106,6 +106,9 @@ export const BoostQueue = ({
   } = useTxn({
     message: "Activating queued BGT to Validator",
     actionType: TransactionActionType.DELEGATE,
+    onError: () => {
+      setHasSubmittedTxn({} as any);
+    },
     onSuccess: () => {
       setIsValidatorDataLoading(true);
       setTimeout(() => {
@@ -123,8 +126,11 @@ export const BoostQueue = ({
     isLoading: isDropBoostLoading,
     ModalPortal: DropBoostModalPortal,
   } = useTxn({
-    message: "Dropping queued boost to Validator",
+    message: "Confirming queued boost drop to validator",
     actionType: TransactionActionType.DELEGATE,
+    onError: () => {
+      setHasSubmittedTxn({} as any);
+    },
     onSuccess: () => {
       refresh();
       refreshBalance();
@@ -141,6 +147,9 @@ export const BoostQueue = ({
   } = useTxn({
     message: "Cancelling queued BGT to Validator",
     actionType: TransactionActionType.DELEGATE,
+    onError: () => {
+      setHasSubmittedTxn({} as any);
+    },
     onSuccess: () => {
       setIsValidatorDataLoading(true);
       setTimeout(() => {
@@ -160,6 +169,9 @@ export const BoostQueue = ({
   } = useTxn({
     message: "Cancelling queued drop boost to Validator",
     actionType: TransactionActionType.DELEGATE,
+    onError: () => {
+      setHasSubmittedTxn({} as any);
+    },
     onSuccess: () => {
       setIsValidatorDataLoading(true);
       setTimeout(() => {
