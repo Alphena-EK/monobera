@@ -6,14 +6,14 @@ import {
   useValidatorOperatorAddress,
   useValidatorQueuedOperatorAddress,
 } from "@bera/berajs";
-import { depositContractAddress } from "@bera/config";
+import { blockExplorerUrl, depositContractAddress } from "@bera/config";
 import { useTxn } from "@bera/shared-ui";
 import { Button } from "@bera/ui/button";
 import { Card, CardContent, CardFooter } from "@bera/ui/card";
 import { Checkbox } from "@bera/ui/checkbox";
 import { Icons } from "@bera/ui/icons";
 import { Input } from "@bera/ui/input";
-import { Address, zeroAddress } from "viem";
+import { Address, isAddress, zeroAddress } from "viem";
 
 export const GeneralSettings = ({
   validatorPublicKey,
@@ -107,6 +107,10 @@ export const GeneralSettings = ({
     });
   }, [validatorPublicKey]);
 
+  const isValidAddress = useMemo(() => {
+    return operatorInput ? isAddress(operatorInput) : true;
+  }, [operatorInput]);
+
   return (
     <div className="flex flex-col gap-6">
       {isQueuedOperatorAddress && (
@@ -119,13 +123,22 @@ export const GeneralSettings = ({
                   ? "Confirm Operator Address Change"
                   : "Queued Operator Address Change"}
               </div>
-              <span className="text-sm text-muted-foreground">
-                {`Operator Address is currently queued to change to ${
-                  queuedOperatorAddress?.[1]
-                }. You'll be able to apply the change at ${new Date(
-                  timeRemaining,
-                ).toLocaleString()}`}
-              </span>
+              <div>
+                <span className="text-sm text-muted-foreground">
+                  {"Operator Address is currently queued to change to "}
+                  <a
+                    href={`${blockExplorerUrl}/address/${queuedOperatorAddress?.[1]}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-semibold underline hover:text-primary"
+                  >
+                    {queuedOperatorAddress?.[1]}
+                  </a>
+                  {`. You'll be able to apply the change at ${new Date(
+                    timeRemaining,
+                  ).toLocaleString()}`}
+                </span>
+              </div>
             </div>
             <div className="mt-4 flex gap-2 self-end md:self-auto">
               <Button
@@ -159,7 +172,13 @@ export const GeneralSettings = ({
           <span className="mt-2 flex font-semibold">Operator Address</span>
           <Input
             type="input"
-            className="w-[300px]"
+            className={`w-[300px] ${
+              operatorInput
+                ? isValidAddress
+                  ? "border-green-500"
+                  : "border-red-500"
+                : ""
+            }`}
             value={operatorInput}
             onChange={(e) => setOperatorInput(e.target.value)}
           />
@@ -172,7 +191,10 @@ export const GeneralSettings = ({
               checked={confirmed}
               onCheckedChange={() => setConfirmed(!confirmed)}
             />
-            <span className="mr-2 text-sm text-muted-foreground">
+            <span
+              className="mr-2 cursor-pointer text-sm text-muted-foreground"
+              onClick={() => setConfirmed(!confirmed)}
+            >
               I understand that changing operator address is equivalent to
               handing over ownership rights to the validator
             </span>
@@ -180,7 +202,7 @@ export const GeneralSettings = ({
           <Button
             className="flex w-[100px] self-center border border-border p-2"
             size={"sm"}
-            disabled={!confirmed || isApplyingOperatorChange}
+            disabled={!confirmed || isApplyingOperatorChange || !isValidAddress}
             onClick={handleSaveSettings}
           >
             {"Save"}
