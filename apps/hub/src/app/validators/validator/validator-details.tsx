@@ -30,7 +30,9 @@ export default function ValidatorDetails({
       title: "Bera staked",
       value: (
         <div className="text-xl font-semibold">
-          <FormattedNumber value={0} />
+          <FormattedNumber
+            value={validator?.dynamicData?.depositStakedAmount ?? 0}
+          />
         </div>
       ),
       tooltipText: "Amount of BERA staked by this validator",

@@ -48,7 +48,8 @@ export const UserDelegation = ({
         <Skeleton className="h-full w-full" />
       ) : (
         <>
-          {Number(userBoosts?.queuedBoosts) <= 0 &&
+          {Number(userBoosts?.activeBoosts) <= 0 &&
+          Number(userBoosts?.queuedBoosts) <= 0 &&
           Number(userBoosts?.queuedUnboosts) <= 0 ? (
             <div className="flex h-full w-full items-center justify-center text-center text-sm font-medium leading-5 text-muted-foreground">
               You have no current or queued delegations
@@ -67,10 +68,13 @@ export const UserDelegation = ({
                 </div>
               </div>
               <hr />
-              <BoostQueue
-                setIsValidatorDataLoading={setIsValidatorDataLoading}
-                selectedValidator={valPubKey}
-              />
+              {Number(userBoosts?.queuedBoosts) <= 0 &&
+              Number(userBoosts?.queuedUnboosts) <= 0 ? (
+                <BoostQueue
+                  setIsValidatorDataLoading={setIsValidatorDataLoading}
+                  selectedValidator={valPubKey}
+                />
+              ) : null}
             </>
           )}
         </>

@@ -1,4 +1,4 @@
-import { balancerApiChainName, polEndpointUrl } from "@bera/config";
+import { balancerApiChainName } from "@bera/config";
 import { bexApiGraphqlClient } from "@bera/graphql";
 import {
   ApiVaultFragment,

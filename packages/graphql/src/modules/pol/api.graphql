@@ -85,6 +85,7 @@ fragment ApiValidator on GqlValidator {
     bgtCapturePercentage
     bgtEmittedAllTime
     rewardRate
+    depositStakedAmount
   }
   rewardAllocationWeights {
     ...ApiRewardAllocationWeight
