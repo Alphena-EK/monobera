@@ -42,7 +42,10 @@ export default async function PoolPage({
   });
 
   if (!stakeToken) {
-    console.error("Factory address not found, so vault is invalid", stakeToken);
+    console.error(
+      "Stake token address not found, so vault is invalid",
+      stakeToken,
+    );
     notFound();
   }
 

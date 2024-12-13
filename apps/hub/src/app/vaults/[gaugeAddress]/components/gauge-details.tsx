@@ -3,7 +3,6 @@
 import { notFound, useRouter } from "next/navigation";
 import {
   truncateHash,
-  useVaultAddress,
   useRewardVault,
   useVaultValidators,
   type UserValidator,
@@ -71,7 +70,10 @@ const _GaugeDetails = ({ gaugeAddress }: { gaugeAddress: Address }) => {
     return { ...incentive, token };
   });
 
-  if (rewardVaultError) return notFound();
+  if (!rewardVault && !isRewardVaultLoading && rewardVaultError) {
+    console.error("Reward vault error", rewardVaultError, rewardVault);
+    return notFound();
+  }
 
   return (
     <>
