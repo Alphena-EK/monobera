@@ -11,7 +11,7 @@ import { Button } from "@bera/ui/button";
 import { type ColumnDef } from "@tanstack/react-table";
 import { type Address } from "viem";
 
-import { ApiValidatorFragment } from "@bera/graphql/pol/api";
+import { ApiValidatorFragment, ApiVaultFragment } from "@bera/graphql/pol/api";
 import { CuttingBoardDisplay } from "~/app/validators/components/validators-table";
 import { BribesPopover } from "~/components/bribes-tooltip";
 import { useValidatorEstimatedBgtPerYear } from "~/hooks/useValidatorEstimatedBgtPerYear";
@@ -187,7 +187,7 @@ const USER_QUEUED_COLUMN: ColumnDef<ValidatorWithUserBoost> = {
   enableSorting: false,
 };
 
-export const getGaugeValidatorColumns = (gauge: RewardVault) => {
+export const getGaugeValidatorColumns = (rewardVault: ApiVaultFragment) => {
   const gauge_validator_columns: ColumnDef<ApiValidatorFragment>[] = [
     VALIDATOR_COLUMN,
     {
@@ -207,7 +207,7 @@ export const getGaugeValidatorColumns = (gauge: RewardVault) => {
 
         const cuttingBoard = row.original.rewardAllocationWeights.find(
           (cb: any) =>
-            cb.receiver.toLowerCase() === gauge.address.toLowerCase(),
+            cb.receiver.toLowerCase() === rewardVault.address.toLowerCase(),
         );
 
         if (!cuttingBoard)
@@ -261,7 +261,7 @@ export const getGaugeValidatorColumns = (gauge: RewardVault) => {
 
         const cuttingBoard = row.original.rewardAllocationWeights.find(
           (cb: any) =>
-            cb.receiver.toLowerCase() === gauge.address.toLowerCase(),
+            cb.receiver.toLowerCase() === rewardVault.address.toLowerCase(),
         );
         if (!cuttingBoard)
           return (

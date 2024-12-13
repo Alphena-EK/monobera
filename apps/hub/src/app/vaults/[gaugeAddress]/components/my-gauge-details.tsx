@@ -3,10 +3,9 @@ import {
   useBeraJs,
   usePollVaultsInfo,
   useTokenHoneyPrice,
-  type RewardVault,
 } from "@bera/berajs";
 import { beraTokenAddress } from "@bera/config";
-import { FormattedNumber, useAnalytics, useTxn } from "@bera/shared-ui";
+import { FormattedNumber } from "@bera/shared-ui";
 import { Button } from "@bera/ui/button";
 import { Icons } from "@bera/ui/icons";
 import BigNumber from "bignumber.js";
@@ -14,19 +13,19 @@ import BigNumber from "bignumber.js";
 import { GaugueLPChange } from "./gauge-lp-change";
 import { ClaimBGTModal } from "../../components/claim-modal";
 import { useState } from "react";
+import { ApiVaultFragment } from "@bera/graphql/pol/api";
+import { Address } from "viem";
 
 export const MyGaugeDetails = ({
-  gauge,
   rewardVault,
 }: {
-  gauge: Gauge | undefined | null;
-  rewardVault: RewardVault;
+  rewardVault: ApiVaultFragment;
 }) => {
   const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
   const { isReady } = useBeraJs();
 
   const { data } = usePollVaultsInfo({
-    vaultAddress: rewardVault.address,
+    vaultAddress: rewardVault.vaultAddress as Address,
   });
   const { data: price } = useTokenHoneyPrice({
     tokenAddress: beraTokenAddress,
@@ -42,7 +41,7 @@ export const MyGaugeDetails = ({
               My Reward Vault Deposits
             </div>
             <div className="flex justify-between font-medium leading-6">
-              <div>{gauge?.metadata?.name}</div>
+              <div>{rewardVault?.metadata?.name}</div>
               <div className="flex flex-row items-center gap-2">
                 <FormattedNumber
                   value={data?.balance ?? 0}
@@ -89,7 +88,7 @@ export const MyGaugeDetails = ({
             <ClaimBGTModal
               isOpen={isClaimModalOpen}
               onOpenChange={setIsClaimModalOpen}
-              rewardVault={rewardVault.address}
+              rewardVault={rewardVault.vaultAddress as Address}
             />
           </div>
         </div>

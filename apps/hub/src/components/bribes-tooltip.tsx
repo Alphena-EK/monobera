@@ -61,7 +61,6 @@ export const BribesTooltip = ({
       const tokenPrice = parseFloat(
         tokenHoneyPrices?.[ab.token.address] ?? "0",
       );
-      console.log({ ab });
       return {
         totalIncentives:
           acc.totalIncentives + Number(ab.amountRemaining) * tokenPrice,

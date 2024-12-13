@@ -1,26 +1,23 @@
+import { ApiVaultFragment } from "@bera/graphql/pol/api";
 import useSWR, { mutate } from "swr";
-import { Address, isAddress } from "viem";
+import { Address } from "viem";
 
-import { getGauge } from "~/actions";
+import { getApiRewardVault } from "~/actions";
 import { DefaultHookOptions, DefaultHookReturnType, Gauge } from "~/types";
 
 export interface UsePollValidatorInfoResponse
-  extends DefaultHookReturnType<Gauge | null> {}
+  extends DefaultHookReturnType<ApiVaultFragment> {}
 
-/**
- *
- * @deprecated should be refactored to use the new endpoint and onchain data
- */
 export const useRewardVault = (
   id: Address | undefined,
   options?: DefaultHookOptions,
 ): UsePollValidatorInfoResponse => {
   const QUERY_KEY = id ? ["useSelectedValidator", id] : null;
-  const swrResponse = useSWR<Gauge | null, any, typeof QUERY_KEY>(
+  const swrResponse = useSWR<ApiVaultFragment, any, typeof QUERY_KEY>(
     QUERY_KEY,
     async () => {
-      if (!id || !isAddress(id)) throw new Error("Invalid address");
-      return await getGauge(id);
+      if (!id) throw new Error("Invalid address");
+      return await getApiRewardVault(id);
     },
     {
       ...options?.opts,

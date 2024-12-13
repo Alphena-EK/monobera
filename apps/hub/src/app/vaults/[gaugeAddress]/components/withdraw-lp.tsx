@@ -1,8 +1,6 @@
 import { useState } from "react";
 import {
   BERA_VAULT_REWARDS_ABI,
-  Gauge,
-  RewardVault,
   Token,
   TransactionActionType,
   usePollVaultsInfo,
@@ -16,20 +14,21 @@ import {
 import { Button } from "@bera/ui/button";
 import { Slider } from "@bera/ui/slider";
 import BigNumber from "bignumber.js";
-import { parseUnits } from "viem";
+import { Address, parseUnits } from "viem";
+import { ApiVaultFragment } from "@bera/graphql/pol/api";
 
 export const WithdrawLP = ({
   lpToken,
   rewardVault,
 }: {
   lpToken: Token;
-  rewardVault: RewardVault;
+  rewardVault: ApiVaultFragment;
 }) => {
   const [withdrawAmount, setWithdrawAmount] = useState<`${number}`>("0");
   const [withdrawPercent, setWithdrawPercent] = useState<number>(0);
 
   const { data, refresh } = usePollVaultsInfo({
-    vaultAddress: rewardVault.address,
+    vaultAddress: rewardVault.vaultAddress as Address,
   });
 
   const validAmount =
@@ -45,7 +44,7 @@ export const WithdrawLP = ({
         track("unstake", {
           quantity: withdrawAmount,
           token: lpToken.symbol,
-          vault: rewardVault.address,
+          vault: rewardVault.vaultAddress,
         });
       } catch (e) {
         captureException(e);
@@ -141,7 +140,7 @@ export const WithdrawLP = ({
           disabled={!validAmount}
           onClick={() =>
             write({
-              address: rewardVault.address,
+              address: rewardVault.vaultAddress as Address,
               abi: BERA_VAULT_REWARDS_ABI,
               functionName: "withdraw",
               params: [parseUnits(withdrawAmount, lpToken.decimals)],

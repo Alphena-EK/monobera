@@ -15,6 +15,7 @@ fragment ApiVaultIncentive on GqlRewardVaultIncentive {
 fragment ApiVault on GqlRewardVault {
   id: vaultAddress
   vaultAddress
+  address: vaultAddress
   isVaultWhitelisted
 
   dynamicData {
@@ -34,6 +35,7 @@ fragment ApiVault on GqlRewardVault {
     name
     name
     logoURI
+    url
     productName
   }
 
@@ -122,5 +124,11 @@ query GetValidators(
 query GetVaultValidators($vaultId: String!) {
   validators: polGetValidators(where: { vaultAddress: $vaultId }) {
     ...ApiValidator
+  }
+}
+
+query GetRewardVault($vaultId: String!, $chain: GqlChain!) {
+  rewardVault: polGetRewardVault(vaultAddress: $vaultId, chain: $chain) {
+    ...ApiVault
   }
 }

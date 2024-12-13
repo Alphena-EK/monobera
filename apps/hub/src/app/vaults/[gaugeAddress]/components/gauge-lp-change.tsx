@@ -3,12 +3,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@bera/ui/tabs";
 
 import { DepositLP } from "./deposit-lp";
 import { WithdrawLP } from "./withdraw-lp";
+import { ApiVaultFragment } from "@bera/graphql/pol/api";
 
 export const GaugueLPChange = ({
   rewardVault,
-}: { rewardVault: RewardVault }) => {
+}: { rewardVault: ApiVaultFragment }) => {
   const { data: lpToken } = useTokenInformation({
-    address: rewardVault.stakeToken,
+    address: rewardVault.stakingToken.address,
   });
 
   return (

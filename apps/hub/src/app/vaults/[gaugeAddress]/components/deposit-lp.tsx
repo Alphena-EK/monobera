@@ -18,14 +18,15 @@ import {
 } from "@bera/shared-ui";
 import { Button } from "@bera/ui/button";
 import BigNumber from "bignumber.js";
-import { parseUnits } from "viem";
+import { Address, parseUnits } from "viem";
+import { ApiVaultFragment } from "@bera/graphql/pol/api";
 
 export const DepositLP = ({
   lpToken,
   rewardVault,
 }: {
   lpToken: Token;
-  rewardVault: RewardVault;
+  rewardVault: ApiVaultFragment;
 }) => {
   const { useSelectedWalletBalance } = usePollWalletBalances({
     externalTokenList: [lpToken],
@@ -37,7 +38,7 @@ export const DepositLP = ({
     BigNumber(depositAmount).lte(balance?.formattedBalance ?? "0");
 
   const { refresh } = usePollVaultsInfo({
-    vaultAddress: rewardVault.address,
+    vaultAddress: rewardVault.vaultAddress as Address,
   });
 
   const { captureException, track } = useAnalytics();
@@ -49,7 +50,7 @@ export const DepositLP = ({
         track("stake", {
           quantity: depositAmount,
           token: lpToken.symbol,
-          vault: rewardVault.address,
+          vault: rewardVault.vaultAddress,
         });
       } catch (e) {
         captureException(e);
@@ -63,7 +64,7 @@ export const DepositLP = ({
   });
 
   const { data: allowance } = usePollAllowance({
-    spender: rewardVault.address,
+    spender: rewardVault.vaultAddress as Address,
     token: lpToken,
   });
 
@@ -101,7 +102,7 @@ export const DepositLP = ({
         !exceeding ? (
           <ApproveButton
             token={lpToken}
-            spender={rewardVault.address}
+            spender={rewardVault.vaultAddress as Address}
             amount={parseUnits(depositAmount, lpToken.decimals)}
           />
         ) : (
@@ -110,7 +111,7 @@ export const DepositLP = ({
             disabled={!validAmount || exceeding}
             onClick={() =>
               write({
-                address: rewardVault.address,
+                address: rewardVault.vaultAddress as Address,
                 abi: BERA_VAULT_REWARDS_ABI,
                 functionName: "stake",
                 params: [parseUnits(depositAmount, lpToken.decimals)],

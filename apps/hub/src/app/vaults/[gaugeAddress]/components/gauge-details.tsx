@@ -42,20 +42,13 @@ export const GaugeDetails = ({
 
 const _GaugeDetails = ({ gaugeAddress }: { gaugeAddress: Address }) => {
   const {
-    data: gauge,
-    isLoading: isGaugeLoading,
-    error: gaugeError,
-    isValidating: isGaugeValidating,
+    data: rewardVault,
+    isLoading: isRewardVaultLoading,
+    isValidating: rewardVaultError,
   } = useRewardVault(gaugeAddress);
 
   const router = useRouter();
   const { account } = useBeraJs();
-
-  const {
-    data: rewardVault,
-    isLoading: isRewardVaultLoading,
-    error: rewardVaultError,
-  } = useVaultAddress(gaugeAddress);
 
   const {
     data: validators = [],
@@ -64,7 +57,7 @@ const _GaugeDetails = ({ gaugeAddress }: { gaugeAddress: Address }) => {
   } = useVaultValidators(gaugeAddress);
 
   const { data: incentivesData } = useRewardVaultIncentives({
-    address: rewardVault?.address,
+    address: rewardVault?.vaultAddress as Address,
   });
 
   const { data: incentiveTokens } = useMultipleTokenInformation({
@@ -88,11 +81,11 @@ const _GaugeDetails = ({ gaugeAddress }: { gaugeAddress: Address }) => {
             title={
               <>
                 <GaugeIcon
-                  address={rewardVault?.address}
+                  address={rewardVault?.vaultAddress as Address}
                   size="xl"
-                  overrideImage={gauge?.metadata?.logoURI}
+                  overrideImage={rewardVault?.metadata?.logoURI}
                 />
-                {gauge?.metadata?.name ?? truncateHash(gaugeAddress)}
+                {rewardVault?.metadata?.name ?? truncateHash(gaugeAddress)}
               </>
             }
             subtitles={[
@@ -101,23 +94,25 @@ const _GaugeDetails = ({ gaugeAddress }: { gaugeAddress: Address }) => {
                 content: (
                   <>
                     <MarketIcon
-                      market={gauge?.metadata?.product ?? ""}
+                      market={rewardVault?.metadata?.productName ?? ""}
                       size={"md"}
                     />
-                    {gauge?.metadata?.product ?? "OTHER"}
+                    {rewardVault?.metadata?.productName ?? "OTHER"}
                   </>
                 ),
-                externalLink: gauge?.metadata?.url ?? "",
+                externalLink: rewardVault?.metadata?.url ?? "",
               },
               {
                 title: "Reward Vault",
-                content: <>{truncateHash(rewardVault?.address ?? "")}</>,
-                externalLink: `${blockExplorerUrl}/address/${rewardVault?.address}`,
+                content: <>{truncateHash(rewardVault?.vaultAddress ?? "")}</>,
+                externalLink: `${blockExplorerUrl}/address/${rewardVault?.vaultAddress}`,
               },
               {
                 title: "Staking Contract",
-                content: <>{truncateHash(gauge?.stakingTokenAddress ?? "")}</>,
-                externalLink: `${blockExplorerUrl}/address/${gauge?.stakingTokenAddress}`,
+                content: (
+                  <>{truncateHash(rewardVault?.stakingToken.address ?? "")}</>
+                ),
+                externalLink: `${blockExplorerUrl}/address/${rewardVault?.stakingToken.address}`,
               },
             ]}
             className="border-b border-border pb-8"
@@ -150,7 +145,7 @@ const _GaugeDetails = ({ gaugeAddress }: { gaugeAddress: Address }) => {
             ))}
 
           {gaugeAddress.toLowerCase() !== lendRewardsAddress.toLowerCase() ? (
-            <MyGaugeDetails gauge={gauge} rewardVault={rewardVault} />
+            <MyGaugeDetails rewardVault={rewardVault} />
           ) : (
             <BendRewardsBanner />
           )}
@@ -169,8 +164,8 @@ const _GaugeDetails = ({ gaugeAddress }: { gaugeAddress: Address }) => {
 
             <TabsContent value="incentives">
               <DataTable
-                loading={isGaugeLoading}
-                validating={isGaugeValidating}
+                loading={isRewardVaultLoading}
+                validating={rewardVaultError}
                 columns={gauge_incentives_columns}
                 data={activeIncentives ?? []}
                 className="max-h-[300px] min-w-[1000px] shadow"

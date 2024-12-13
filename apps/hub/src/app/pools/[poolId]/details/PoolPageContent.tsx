@@ -463,7 +463,9 @@ export default function PoolPageContent({
                                   compactThreshold={999_999_999}
                                   percent
                                   value={
-                                    gauge?.bgtInflationCapture / 10000 ?? 0
+                                    Number(
+                                      gauge?.dynamicData?.bgtCapturePercentage,
+                                    ) / 10000 ?? 0
                                   }
                                 />
                               ) : (
