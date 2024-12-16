@@ -1,9 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Tooltip } from "@bera/shared-ui";
 import { Button } from "@bera/ui/button";
 import posthog from "posthog-js";
+import { createPortal } from "react-dom";
 import { useLocalStorage } from "usehooks-ts";
 
 import { LOCAL_STORAGE_KEYS } from "~/utils/constants";
@@ -42,7 +43,13 @@ export default function CookiesSettingsBanner() {
     return null;
   }
 
-  return (
+  // NOTE: we only display this when mounted client-side.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const banner = (
     <div className="border-1 fixed bottom-4 left-2 right-2 z-50 flex flex-col gap-4 rounded-md border-muted-foreground bg-muted p-4 text-white shadow-lg md:left-4 md:right-4 md:flex-row md:items-center">
       <h4 className="flex flex-1 items-center gap-1 font-sans leading-none">
         Accept Tracking Cookies
@@ -66,4 +73,5 @@ export default function CookiesSettingsBanner() {
       </div>
     </div>
   );
+  return mounted ? createPortal(banner, document.body) : null;
 }
