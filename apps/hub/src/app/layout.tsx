@@ -1,5 +1,5 @@
 import "../styles/globals.css";
-import { existsSync, readFileSync } from "fs";
+import { existsSync, readFileSync, readdir } from "fs";
 import path from "path";
 import { Metadata } from "next";
 import dynamic from "next/dynamic";
@@ -48,6 +48,22 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
       }
       fetchedTokenList = await response.json();
     } else {
+      // Read directory contents
+      readdir(process.cwd(), { withFileTypes: true }, (err, entries) => {
+        if (err) {
+          console.error("Error reading directory:", err);
+          return;
+        }
+
+        console.log("Current directory:", process.cwd());
+        console.log("\nContents:");
+
+        entries.forEach((entry) => {
+          const type = entry.isDirectory() ? "Directory" : "File";
+          console.log(`${type}: ${entry.name}`);
+        });
+      });
+
       const publicPath = path.join(process.cwd(), "public");
       const tokenListPath = path.join(publicPath, tokenListUrl);
 

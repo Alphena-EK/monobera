@@ -17,6 +17,11 @@ const config = {
     esmExternals: "loose",
     webpackBuildWorker: true,
     missingSuspenseWithCSRBailout: false,
+    outputFileTracingIncludes: {
+      "/internal-env/defaultTokenList.json": [
+        "./public/internal-env/defaultTokenList.json",
+      ],
+    },
   },
   /** We already do linting and typechecking as separate tasks in CI */
   eslint: { ignoreDuringBuilds: true },
