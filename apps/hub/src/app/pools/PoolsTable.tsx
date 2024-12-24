@@ -164,7 +164,7 @@ export const PoolSearch = ({
         </div>
 
         <TabsContent value="allPools" className="mt-4 text-center">
-          {data === undefined && isLoading ? (
+          {data === undefined || isLoading ? (
             <div className="flex w-full flex-col items-center justify-center gap-4">
               <DataTableLoading
                 columns={table.getAllColumns().length}
@@ -180,9 +180,9 @@ export const PoolSearch = ({
                 variant="ghost"
                 mutedBackgroundOnHead={false}
                 onRowHover={(row) => {
-                  router.prefetch(getPoolUrl(row.original));
+                  router.prefetch(getPoolUrl(row.original.pool));
                 }}
-                onRowClick={(row) => router.push(getPoolUrl(row.original))}
+                onRowClick={(row) => router.push(getPoolUrl(row.original.pool))}
                 wrapperClassName="bg-transparent border-none"
                 showToolbar={true}
               />
@@ -213,7 +213,7 @@ export const PoolSearch = ({
                 dynamicFlex
                 variant="ghost"
                 mutedBackgroundOnHead={false}
-                onRowClick={(row) => router.push(getPoolUrl(row.original))}
+                onRowClick={(row) => router.push(getPoolUrl(row.original.pool))}
                 wrapperClassName="bg-transparent border-none"
                 showToolbar={true}
               />

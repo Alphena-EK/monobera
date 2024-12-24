@@ -1,9 +1,10 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ADDRESS_ZERO,
   useBgtInflation,
   useIsWhitelistedVault,
-  useRewardVaultsFromTokens,
+  useRewardVaultAddressesFromTokens,
+  useRewardVaults,
 } from "@bera/berajs";
 import { MinimalPoolInListFragment } from "@bera/graphql/dex/api";
 import {
@@ -12,6 +13,7 @@ import {
   useAsyncTable,
 } from "@bera/shared-ui";
 
+import { POLLING } from "~/utils/constants";
 import { PoolSummary } from "../../components/pools-table-columns";
 import { usePools } from "./usePools";
 
@@ -48,28 +50,56 @@ export const usePoolTable = ({
     [pools],
   );
 
-  // Extract vault addresses from the token addresse and fetch the whitelist statuses for all of those vaults
-  const { data: rewardVaults } = useRewardVaultsFromTokens({
+  // Pull vault addresses from the token addresses via multicall on the reward vault factory
+  const { data: rewardVaultsAddressMap } = useRewardVaultAddressesFromTokens({
     tokenAddresses,
   });
 
   const vaultAddresses = useMemo(
-    () => Object.values(rewardVaults ?? {}).filter((v) => v !== ADDRESS_ZERO),
-    [rewardVaults],
+    () =>
+      Object.values(rewardVaultsAddressMap ?? {}).filter(
+        (v) => v !== ADDRESS_ZERO,
+      ),
+    [rewardVaultsAddressMap],
   );
 
-  const { data: whitelistedVaults } = useIsWhitelistedVault(vaultAddresses);
+  // Pull isWhitelisted via multicall on the vault addresses we got
+  // NOTE: we prefer to pull isWhitelisted on-chain for availability reasons.
+  const { data: whitelistedVaultsAddressMap } =
+    useIsWhitelistedVault(vaultAddresses);
 
-  // Map vault whitelist status
-  const whitelistStatusMap = useMemo(() => {
-    return new Map(
-      whitelistedVaults?.map((vault) => [vault.address, vault.isWhitelisted]) ||
-        [],
-    );
-  }, [whitelistedVaults]);
+  // Pull full Dynamic data etc from the vault via bex subgraph
+  const { data: rewardVaultMetadata } = useRewardVaults(
+    // TODO (BFE-444): this should use pagination / an index since this will become a performance issue when we have many pools.
+    // {
+    //   where: {
+    //     vaultAddressIn: vaultAddresses,
+    //   },
+    // },
+    {},
+    { opts: { refreshInterval: POLLING.SLOW } },
+  );
+  const gaugeDictionary = rewardVaultMetadata?.gaugeDictionary ?? {};
 
-  const table = useAsyncTable<MinimalPoolInListFragment>({
-    data: pools ?? [],
+  // Combine pools and vaults into unified data structure
+  const unifiedData = useMemo(() => {
+    if (!pools) return [];
+    return pools.map((pool) => {
+      const rewardVaultAddress =
+        rewardVaultsAddressMap?.[pool.address.toLowerCase()];
+      const rewardVault = rewardVaultAddress
+        ? gaugeDictionary[rewardVaultAddress.toLowerCase() as `0x${string}`]
+        : null;
+
+      return {
+        pool,
+        vault: rewardVault,
+      };
+    });
+  }, [pools, rewardVaultsAddressMap, gaugeDictionary]);
+
+  const table = useAsyncTable({
+    data: unifiedData ?? [],
     fetchData: async () => {},
     additionalTableProps: {
       initialState: { sorting, pagination: { pageSize: 10, pageIndex: 0 } },
@@ -89,20 +119,29 @@ export const usePoolTable = ({
           />
         ),
         cell: ({ row }) => {
-          const rewardVault =
-            rewardVaults?.[row.original.address.toLowerCase()];
-          const isWhitelistedVault = rewardVault
-            ? whitelistedVaults?.some(
-                (vault) =>
-                  vault.address.toLowerCase() === rewardVault.toLowerCase() &&
-                  vault.isWhitelisted,
-              ) ?? false
-            : false;
-
+          const { pool, vault } = row.original;
+          let isWhitelistedVault = false;
+          try {
+            const rewardVault =
+              rewardVaultsAddressMap?.[pool.address.toLowerCase()];
+            isWhitelistedVault = rewardVault
+              ? whitelistedVaultsAddressMap?.some(
+                  (vault) =>
+                    vault.address.toLowerCase() === rewardVault.toLowerCase() &&
+                    vault.isWhitelisted,
+                ) ?? false
+              : false;
+          } catch (e) {
+            console.error(
+              "Unable to fetch isWhitelistedVault from contract! Falling back to bex api...",
+              e,
+            );
+            isWhitelistedVault = vault?.isVaultWhitelisted ?? false; // NOTE: this is the gql way as a fallback
+          }
           return (
             <div className="flex items-center gap-2">
               <PoolSummary
-                pool={row.original}
+                pool={pool}
                 isWhitelistedVault={isWhitelistedVault}
               />
             </div>
@@ -125,7 +164,7 @@ export const usePoolTable = ({
           <div className="flex flex-col gap-1">
             <div className="text-sm leading-5">
               <FormattedNumber
-                value={row.original?.dynamicData?.totalLiquidity ?? 0}
+                value={row.original.pool.dynamicData?.totalLiquidity ?? 0}
                 symbol="USD"
               />
             </div>
@@ -136,8 +175,8 @@ export const usePoolTable = ({
         },
         sortingFn: (rowA, rowB) => {
           return (
-            Number(rowA.original.dynamicData.totalLiquidity ?? "0") -
-            Number(rowB.original.dynamicData.totalLiquidity ?? "0")
+            Number(rowA.original.pool.dynamicData?.totalLiquidity ?? "0") -
+            Number(rowB.original.pool.dynamicData?.totalLiquidity ?? "0")
           );
         },
       },
@@ -154,7 +193,7 @@ export const usePoolTable = ({
           <div className="flex flex-col gap-1">
             <div className="text-sm leading-5">
               <FormattedNumber
-                value={row.original.dynamicData.fees24h ?? "0"}
+                value={row.original.pool.dynamicData?.fees24h ?? "0"}
                 symbol="USD"
               />
             </div>
@@ -166,8 +205,8 @@ export const usePoolTable = ({
         },
         sortingFn: (rowA, rowB) => {
           return (
-            Number(rowA.original.dynamicData.fees24h ?? "0") -
-            Number(rowB.original.dynamicData.fees24h ?? "0")
+            Number(rowA.original.pool.dynamicData?.fees24h ?? "0") -
+            Number(rowB.original.pool.dynamicData?.fees24h ?? "0")
           );
         },
       },
@@ -184,7 +223,7 @@ export const usePoolTable = ({
           <div className="flex flex-col gap-1">
             <div className="text-sm leading-5">
               <FormattedNumber
-                value={row.original.dynamicData.volume24h ?? "0"}
+                value={row.original.pool.dynamicData?.volume24h ?? "0"}
                 symbol="USD"
               />
             </div>
@@ -196,8 +235,8 @@ export const usePoolTable = ({
         },
         sortingFn: (rowA, rowB) => {
           return (
-            Number(rowA.original.dynamicData.volume24h ?? "0") -
-            Number(rowB.original.dynamicData.volume24h ?? "0")
+            Number(rowA.original.pool.dynamicData?.volume24h ?? "0") -
+            Number(rowB.original.pool.dynamicData?.volume24h ?? "0")
           );
         },
       },
@@ -214,15 +253,16 @@ export const usePoolTable = ({
           return (
             <div
               className={`flex items-center justify-start text-sm ${
-                row.original.dynamicData.aprItems?.at(0)?.apr === 0
+                row.original.pool.dynamicData?.aprItems?.at(0)?.apr === 0
                   ? "text-info-foreground"
                   : "text-warning-foreground"
               }`}
             >
               <FormattedNumber
                 value={
-                  row.original.dynamicData.aprItems?.at(0)?.apr?.toString() ??
-                  "0"
+                  row.original.pool.dynamicData?.aprItems
+                    ?.at(0)
+                    ?.apr?.toString() ?? "0"
                 }
                 percent
                 compact
@@ -236,16 +276,50 @@ export const usePoolTable = ({
         },
         sortingFn: (rowA, rowB) => {
           return (
-            Number(rowA.original.dynamicData.aprItems?.at(0)?.apr ?? "0") -
-            Number(rowB.original.dynamicData.aprItems?.at(0)?.apr ?? "0")
+            Number(
+              rowA.original.pool.dynamicData?.aprItems?.at(0)?.apr ?? "0",
+            ) -
+            Number(rowB.original.pool.dynamicData?.aprItems?.at(0)?.apr ?? "0")
           );
         },
+      },
+      {
+        accessorKey: "vault.dynamicData.apy",
+        header: ({ column }) => (
+          <DataTableColumnHeader
+            column={column}
+            title="Vault APY"
+            className="whitespace-nowrap"
+          />
+        ),
+        cell: ({ row }) => {
+          const { vault } = row.original;
+          const apy = vault?.dynamicData?.apy;
+
+          return (
+            <div className="flex flex-col gap-1">
+              <div className="text-sm leading-5">
+                {apy !== undefined && apy !== null ? (
+                  <FormattedNumber
+                    value={apy}
+                    percent
+                    compact
+                    showIsSmallerThanMin
+                  />
+                ) : (
+                  "—" // Placeholder for missing APY data
+                )}
+              </div>
+            </div>
+          );
+        },
+        enableSorting: true,
       },
     ],
   });
 
   return {
-    data: pools,
+    data: unifiedData,
     table,
     search,
     setSearch,
