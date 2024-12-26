@@ -2,7 +2,7 @@
   "name": "monobera",
   "private": true,
   "engines": {
-    "node": ">=v22.0.0",
+    "node": ">=22.0.0",
     "pnpm": ">=9"
   },
   "pnpm": {
@@ -22,7 +22,7 @@
     "build:ipfs": "NEXT_PUBLIC_HOST=ipfs turbo build --filter=hub --filter=honey --filter='./packages/*' --concurrency=20",
     "build:hub": "turbo build --filter=hub --filter='./packages/*' --concurrency=20",
     "build:honey": "turbo build --filter=honey --filter='./packages/*' --concurrency=20",
-    "build:storybook": "turbo build --filter=storybook --filter='./packages/*' --concurrency=20  --filter='!b-sdk'",
+    "build:storybook": "turbo build --filter=storybook --filter='./packages/*' --concurrency=20 --filter='!b-sdk'",
     "build:lend": "turbo build --filter=lend --filter='./packages/*' --concurrency=20 --filter='!b-sdk'",
     "build:perp": "turbo build --filter=perp --filter='./packages/*' --concurrency=20 --filter='!b-sdk'",
     "build:berajs-docs": "turbo build --filter=berajs-docs --filter='./packages/*' --concurrency=20",
